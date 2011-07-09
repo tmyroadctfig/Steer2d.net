@@ -125,15 +125,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DrawingSystem\LineBatch.cs" />
-    <Compile Include="Samples\AdvancedDemo1.cs" />
-    <Compile Include="Samples\AdvancedDemo2.cs" />
-    <Compile Include="Samples\AdvancedDemo3.cs" />
-    <Compile Include="Samples\AdvancedDemo4.cs" />
-    <Compile Include="Samples\AdvancedDemo5.cs" />
+    <Compile Include="Entities\FixedObstacle.cs" />
+    <Compile Include="Entities\Ship.cs" />
+    <Compile Include="Samples\Demo1.cs" />
+    <Compile Include="Samples\Demo2.cs" />
     <Compile Include="ScreenSystem\FramerateCounterComponent.cs" />
     <Compile Include="DrawingSystem\AssetCreator.cs" />
     <Compile Include="DrawingSystem\Sprite.cs" />
-    <Compile Include="Samples\GameDemo1.cs" />
     <Compile Include="Samples\Prefabs\Agent.cs" />
     <Compile Include="Samples\Prefabs\Border.cs" />
     <Compile Include="Samples\Prefabs\Objects.cs" />
@@ -160,14 +158,6 @@
     <Compile Include="ScreenSystem\MenuScreen.cs" />
     <Compile Include="ScreenSystem\MessageBoxScreen.cs" />
     <Compile Include="Samples\SimpleDemo1.cs" />
-    <Compile Include="Samples\SimpleDemo2.cs" />
-    <Compile Include="Samples\SimpleDemo3.cs" />
-    <Compile Include="Samples\SimpleDemo4.cs" />
-    <Compile Include="Samples\SimpleDemo5.cs" />
-    <Compile Include="Samples\SimpleDemo6.cs" />
-    <Compile Include="Samples\SimpleDemo7.cs" />
-    <Compile Include="Samples\SimpleDemo8.cs" />
-    <Compile Include="Samples\SimpleDemo9.cs" />
     <Compile Include="ScreenSystem\VirtualButton.cs" />
     <Compile Include="ScreenSystem\VirtualStick.cs" />
   </ItemGroup>
@@ -180,6 +170,10 @@
       <Name>Samples XNA Content %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
       <Project>{C8D1B1FB-E7FA-4BCF-BC8A-4D5D93429F67}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Steer2d\Steer2d.csproj">
+      <Project>{3EC987CB-EDE6-45E8-A8DB-8F6B728F9EF6}</Project>
+      <Name>Steer2d</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
