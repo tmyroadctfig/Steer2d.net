@@ -1,0 +1,25 @@
+syntax: glob
+Steer2d.suo
+Steer2d/bin
+Steer2d/obj
+Dependencies/FarseerPhysics/DemoBaseXNA/bin
+Steer2d.Example/bin
+Steer2d.Example/Content/obj
+Steer2d.Example/obj
+Steer2d.Example/Content/Steer2d.ExampleContent.contentproj.user
+Steer2d.Example/Steer2d.Example.csproj.Debug.cachefile
+Steer2d.Example/Steer2d.Example.csproj.user
+Dependencies/FarseerPhysics/DemoBaseXNA/Content/obj
+Dependencies/FarseerPhysics/SimpleSamplesXNA/obj
+Dependencies/FarseerPhysics/SimpleSamplesXNA/SimpleSamplesXNA.csproj
+Dependencies/FarseerPhysics/SimpleSamplesXNA/SimpleSamplesXNA.csproj.Debug.cachefile
+Steer2d.Example/Content/Content.contentproj.user
+Dependencies/FarseerPhysics/SimpleSamplesXNA/Content/obj
+Dependencies/FarseerPhysics/SimpleSamplesXNA/bin
+Dependencies/FarseerPhysics/SimpleSamplesXNA.suo
+Dependencies/FarseerPhysics/DemoBaseXNA/obj
+Dependencies/FarseerPhysics/Farseer Physics 2.1.3 XNA/obj
+Dependencies/FarseerPhysics/Farseer Physics 2.1.3 XNA/bin
+Dependencies/FarseerPhysics/Farseer Physics 2.1.3 XNA/FarseerPhysicsXNA.csproj.user
+Dependencies/FarseerPhysics/Farseer Physics 2.1.3 XNA/Content/obj
+Dependencies/FarseerPhysics/DemoBaseXNA/DemoBaseXNA.csproj.user
