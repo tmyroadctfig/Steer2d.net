@@ -13,18 +13,15 @@ namespace Steer2d.Example.Entities
 {
     public class Ship : IVehicle
     {
-        Sprite _shipSprite;
-        Sprite _lineSprite;
-
         public Body Body { get; set; }
 
-        public Ship(World world, PhysicsGameScreen screen)
+        public Ship(World world)
         {
             var vertices = new Vertices(new List<Vector2>() 
             {
-                new Vector2(0, -20),
-                new Vector2(10, 5),
-                new Vector2(-10, 5),
+                new Vector2(0, ConvertUnits.ToSimUnits(-20)),
+                new Vector2(ConvertUnits.ToSimUnits(10), ConvertUnits.ToSimUnits(5)),
+                new Vector2(ConvertUnits.ToSimUnits(-10), ConvertUnits.ToSimUnits(5)),
             });
 
             Body = BodyFactory.CreateBody(world);
@@ -32,13 +29,9 @@ namespace Steer2d.Example.Entities
 
             FixtureFactory.AttachPolygon(vertices, 1, Body);
 
-            AssetCreator creator = screen.ScreenManager.Assets;
-            _shipSprite = new Sprite(creator.TextureFromVertices(vertices, MaterialType.Dots, Color.SaddleBrown, 2f));
-            _lineSprite = new Sprite(creator.TextureFromVertices(vertices, MaterialType.Dots, Color.SaddleBrown, 2f));
-
-            MaximumSpeed = 300;
-            MaximumThrust = 1000;
-            MaximumReverseThrust = 1000;
+            MaximumSpeed = ConvertUnits.ToSimUnits(300);
+            MaximumThrust = ConvertUnits.ToSimUnits(1000);
+            MaximumReverseThrust = ConvertUnits.ToSimUnits(1000);
             RotationRate = (float) Math.PI * 2;
         }
 
@@ -76,25 +69,22 @@ namespace Steer2d.Example.Entities
 
         public Vector2 Thrust { get; set; }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(LineBatch lineBatch)
         {
-            //var v1 = Vector2.Transform(new Vector2(0, -20), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
-            //var v2 = Vector2.Transform(new Vector2(10, 5), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
-            //var v3 = Vector2.Transform(new Vector2(-10, 5), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
+            var v1 = Vector2.Transform(new Vector2(0, -ConvertUnits.ToSimUnits(20)), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
+            var v2 = Vector2.Transform(new Vector2(ConvertUnits.ToSimUnits(10), ConvertUnits.ToSimUnits(5)), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
+            var v3 = Vector2.Transform(new Vector2(ConvertUnits.ToSimUnits(-10), ConvertUnits.ToSimUnits(5)), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
+            
+            lineBatch.DrawLine(v1, v2, Color.Red);
+            lineBatch.DrawLine(v2, v3, Color.Red);
+            lineBatch.DrawLine(v3, v1, Color.Red);
+            
+            lineBatch.DrawLine(Body.Position, Body.Position + Velocity, Color.Blue);
 
-            //_lineBrush.Color = Color.Black;
-            //_lineBrush.Draw(spriteBatch, v1, v2);
-            //_lineBrush.Draw(spriteBatch, v2, v3);
-            //_lineBrush.Draw(spriteBatch, v3, v1);
-
-            //_lineBrush.Color = Color.Blue;
-            //_lineBrush.Draw(spriteBatch, Body.Position, Body.Position + Velocity);
-
-            //var thrust = Thrust;
-            //thrust.Normalize();
-            //thrust *= 100;
-            //_lineBrush.Color = Color.Green;
-            //_lineBrush.Draw(spriteBatch, Body.Position, Body.Position + thrust);
+            var thrust = Thrust;
+            thrust.Normalize();
+            thrust *= ConvertUnits.ToSimUnits(100);
+            lineBatch.DrawLine(Body.Position, Body.Position + thrust, Color.Green);
         }
     }
 }

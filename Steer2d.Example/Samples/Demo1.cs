@@ -13,8 +13,6 @@ namespace FarseerPhysics.SamplesFramework
     internal class Demo1 : PhysicsGameScreen, IDemoScreen
     {
         private Border _border;
-        private Body _rectangle;
-        private Sprite _rectangleSprite;
         private Ship _ship;
         private Random _random = new Random();
 
@@ -25,35 +23,23 @@ namespace FarseerPhysics.SamplesFramework
             base.HandleInput(input, gameTime);
         }
 
-        Vector2 ScreenCenter
-        {
-            get
-            {
-                return new Vector2(
-                    ScreenManager.GraphicsDevice.Viewport.Width,
-                    ScreenManager.GraphicsDevice.Viewport.Height) / 2;
-            }
-        }
-
         private void ResetShip()
         {
             _ship.Body.ResetDynamics();
 
-            var width = ScreenManager.GraphicsDevice.Viewport.Width - 100;
-            var height = ScreenManager.GraphicsDevice.Viewport.Height - 100;
-
-            _ship.Position = ScreenCenter;
-
+            var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
+            var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
+            
             _ship.Position += new Vector2(
-                width / 2 - _random.Next(width),
-                height / 2 - _random.Next(height));
+                width / 2 - _random.Next((int)width),
+                height / 2 - _random.Next((int)height));
         }
 
         private void UpdateShip(GameTime gameTime)
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var steering = Steering.GetComponents(_ship, Steering.Seek(_ship.Body.Position, ScreenCenter), elapsedTime);
+            var steering = Steering.GetComponents(_ship, Steering.Seek(_ship.Body.Position, Vector2.Zero), elapsedTime);
 
             if (steering.IsValid)
             {
@@ -72,7 +58,7 @@ namespace FarseerPhysics.SamplesFramework
 
             _ship.LimitVelocity();
 
-            if (VectorUtils.EqualsWithin(_ship.Body.Position, ScreenCenter, 0.5f))
+            if (VectorUtils.EqualsWithin(_ship.Body.Position, Vector2.Zero, 0.5f))
             {
                 ResetShip();
             }
@@ -102,17 +88,7 @@ namespace FarseerPhysics.SamplesFramework
 
             _border = new Border(World, this, ScreenManager.GraphicsDevice.Viewport);
 
-            _rectangle = BodyFactory.CreateRectangle(World, 5f, 5f, 1f);
-            _rectangle.BodyType = BodyType.Dynamic;
-
-            SetUserAgent(_rectangle, 100f, 100f);
-
-            // create sprite based on body
-            _rectangleSprite = new Sprite(ScreenManager.Assets.TextureFromShape(_rectangle.FixtureList[0].Shape,
-                                                                                MaterialType.Squares,
-                                                                                Color.Orange, 1f));
-
-            _ship = new Ship(World, this);
+            _ship = new Ship(World);
 
             ResetShip();
         }
@@ -120,32 +96,33 @@ namespace FarseerPhysics.SamplesFramework
         public override void Draw(GameTime gameTime)
         {
             ScreenManager.SpriteBatch.Begin(0, null, null, null, null, null, Camera.View);
-            ScreenManager.SpriteBatch.Draw(_rectangleSprite.Texture, ConvertUnits.ToDisplayUnits(_rectangle.Position),
-                                           null,
-                                           Color.White, _rectangle.Rotation, _rectangleSprite.Origin, 1f,
-                                           SpriteEffects.None, 0f);
 
-            //_ship.Draw(ScreenManager.SpriteBatch, _lineBrush);
-
-            //// Draw the target
-            //_lineBrush.Draw(
-            //    ScreenManager.SpriteBatch,
-            //    ScreenManager.ScreenCenter + new Vector2(0, -10),
-            //    ScreenManager.ScreenCenter + new Vector2(0, 10));
-
-            //_lineBrush.Draw(
-            //     ScreenManager.SpriteBatch,
-            //     ScreenManager.ScreenCenter + new Vector2(-10, 0),
-            //     ScreenManager.ScreenCenter + new Vector2(10, 0));
-
-            //ScreenManager.SpriteBatch.DrawString(
-            //    _spriteFont,
-            //    string.Format("x:{0:0.00} y:{1:0.00}", _ship.Position.X, _ship.Position.Y),
-            //    new Vector2(40, 40),
-            //    Color.White);
+            ScreenManager.SpriteBatch.DrawString(
+                ScreenManager.Fonts.DetailsFont,
+                string.Format("x:{0:0.00} y:{1:0.00}", _ship.Position.X, _ship.Position.Y),
+                new Vector2(2, 2),
+                Color.White);
 
             ScreenManager.SpriteBatch.End();
+
+
             _border.Draw();
+
+            ScreenManager.LineBatch.Begin(Camera.SimProjection, Camera.SimView);
+
+            _ship.Draw(ScreenManager.LineBatch);
+
+            // Draw the target
+            ScreenManager.LineBatch.DrawLine(
+                new Vector2(0, -1),
+                new Vector2(0, 1));
+
+            ScreenManager.LineBatch.DrawLine(
+                 new Vector2(-1, 0),
+                 new Vector2(1, 0));
+
+            ScreenManager.LineBatch.End();
+
             base.Draw(gameTime);
         }
     }
