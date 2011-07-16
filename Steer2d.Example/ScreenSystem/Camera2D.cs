@@ -39,7 +39,7 @@ namespace FarseerPhysics.SamplesFramework
         {
             _graphics = graphics;
             _projection = Matrix.CreateOrthographicOffCenter(0f, ConvertUnits.ToSimUnits(_graphics.Viewport.Width),
-                                                             ConvertUnits.ToSimUnits(_graphics.Viewport.Height), 0f, 0f,
+                                                             0f, ConvertUnits.ToSimUnits(_graphics.Viewport.Height), 0f,
                                                              1f);
             _view = Matrix.Identity;
             _batchView = Matrix.Identity;

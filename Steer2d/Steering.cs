@@ -78,6 +78,7 @@ namespace Steer2d
         {
             return new SteeringComponents()
             {
+                SteeringForce = steeringForce,
                 Rotation = VectorUtils.FindAngleBetweenTwoVectors(direction, steeringForce),
                 Thrust = Vector2.Dot(direction, steeringForce)
             };
@@ -114,6 +115,7 @@ namespace Steer2d
 
             return new SteeringComponents()
             {
+                SteeringForce = steeringForce,
                 Rotation = rotation,
                 Thrust = thrust
             };

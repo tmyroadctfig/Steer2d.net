@@ -7,20 +7,40 @@ using Steer2d.Utility;
 using Steer2d;
 using Steer2d.Example.Entities;
 using System;
+using Microsoft.Xna.Framework.Input;
 
 namespace FarseerPhysics.SamplesFramework
 {
     internal class Demo1 : PhysicsGameScreen, IDemoScreen
     {
+        private bool OnlyUpdateOnKeyPress { get; set; }
         private Border _border;
         private Ship _ship;
         private Random _random = new Random();
 
+        public Demo1()
+        {
+            OnlyUpdateOnKeyPress = true;
+        }
+
         public override void HandleInput(InputHelper input, GameTime gameTime)
         {
-            UpdateShip(gameTime);
-
             base.HandleInput(input, gameTime);
+
+            if (OnlyUpdateOnKeyPress && input.IsNewKeyPress(Keys.Space))
+            {
+                UpdateShip(gameTime);
+            }
+        }
+
+        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+        {
+            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+
+            if (!OnlyUpdateOnKeyPress)
+            {
+                UpdateShip(gameTime);
+            }
         }
 
         private void ResetShip()
@@ -114,12 +134,12 @@ namespace FarseerPhysics.SamplesFramework
 
             // Draw the target
             ScreenManager.LineBatch.DrawLine(
-                new Vector2(0, -1),
-                new Vector2(0, 1));
+                new Vector2(0, 0),
+                new Vector2(0, 10));
 
             ScreenManager.LineBatch.DrawLine(
-                 new Vector2(-1, 0),
-                 new Vector2(1, 0));
+                 new Vector2(0, 0),
+                 new Vector2(10, 0));
 
             ScreenManager.LineBatch.End();
 

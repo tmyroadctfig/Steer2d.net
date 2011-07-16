@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace Steer2d
 {
@@ -26,6 +27,11 @@ namespace Steer2d
     /// </summary>
     public struct SteeringComponents
     {
+        /// <summary>
+        /// The original steering force.
+        /// </summary>
+        public Vector2 SteeringForce { get; set; }
+
         /// <summary>
         /// The thrust component. If the value is negative then deceleration is required.
         /// </summary>
