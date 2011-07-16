@@ -15,7 +15,10 @@ namespace FarseerPhysics.SamplesFramework
     {
         private bool OnlyUpdateOnKeyPress { get; set; }
         private Border _border;
-        private Ship _ship;
+        private Ship _ship1;
+        private RotationPreferencedSteering _steering1;
+        private Ship _ship2;
+        private RotationPreferencedSteering _steering2;
         private Random _random = new Random();
 
         public Demo1()
@@ -45,12 +48,17 @@ namespace FarseerPhysics.SamplesFramework
 
         private void ResetShip()
         {
-            _ship.Body.ResetDynamics();
+            _ship1.Body.ResetDynamics();
+            _ship2.Body.ResetDynamics();
 
             var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
             var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
             
-            _ship.Position += new Vector2(
+            _ship1.Position += new Vector2(
+                width / 2 - _random.Next((int)width),
+                height / 2 - _random.Next((int)height));
+
+            _ship2.Position += new Vector2(
                 width / 2 - _random.Next((int)width),
                 height / 2 - _random.Next((int)height));
         }
@@ -59,29 +67,16 @@ namespace FarseerPhysics.SamplesFramework
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var steering = Steering.GetComponents(_ship, Steering.Seek(_ship.Body.Position, Vector2.Zero), elapsedTime);
+            var steeringComponents1 = _steering1.Seek(Vector2.Zero, elapsedTime);
+            _ship1.ApplySteering(steeringComponents1);
 
-            if (steering.IsValid)
-            {
-                // Apply rotation
-                _ship.Body.Rotation -= steering.Rotation;
-                _ship.Body.AngularVelocity = 0;
+            var steeringComponents2 = _steering2.Seek(Vector2.Zero, elapsedTime);
+            _ship2.ApplySteering(steeringComponents2);
 
-                // Apply thrust
-                var thrust = _ship.Direction;
-                thrust.Normalize();
-                thrust *= steering.Thrust;
-                _ship.Thrust = thrust;
-
-                _ship.Body.LinearVelocity += thrust;
-            }
-
-            _ship.LimitVelocity();
-
-            if (VectorUtils.EqualsWithin(_ship.Body.Position, Vector2.Zero, 0.5f))
-            {
-                ResetShip();
-            }
+            //if (VectorUtils.EqualsWithin(_ship.Body.Position, Vector2.Zero, 0.5f))
+            //{
+            //    ResetShip();
+            //}
         }
 
         #region IDemoScreen Members
@@ -108,7 +103,11 @@ namespace FarseerPhysics.SamplesFramework
 
             _border = new Border(World, this, ScreenManager.GraphicsDevice.Viewport);
 
-            _ship = new Ship(World);
+            _ship1 = new Ship(World);
+            _steering1 = new RotationPreferencedSteering(_ship1);
+
+            _ship2 = new Ship(World);
+            _steering2 = new RotationPreferencedSteering(_ship2);
 
             ResetShip();
         }
@@ -119,8 +118,13 @@ namespace FarseerPhysics.SamplesFramework
 
             ScreenManager.SpriteBatch.DrawString(
                 ScreenManager.Fonts.DetailsFont,
-                string.Format("x:{0:0.00} y:{1:0.00}", _ship.Position.X, _ship.Position.Y),
+                string.Format("x:{0:0.00} y:{1:0.00}", _ship1.Position.X, _ship1.Position.Y),
                 new Vector2(2, 2),
+                Color.White);
+            ScreenManager.SpriteBatch.DrawString(
+                ScreenManager.Fonts.DetailsFont,
+                string.Format("x:{0:0.00} y:{1:0.00}", _ship2.Position.X, _ship2.Position.Y),
+                new Vector2(2, 22),
                 Color.White);
 
             ScreenManager.SpriteBatch.End();
@@ -130,7 +134,8 @@ namespace FarseerPhysics.SamplesFramework
 
             ScreenManager.LineBatch.Begin(Camera.SimProjection, Camera.SimView);
 
-            _ship.Draw(ScreenManager.LineBatch);
+            _ship1.Draw(ScreenManager.LineBatch);
+            _ship2.Draw(ScreenManager.LineBatch);
 
             // Draw the target
             ScreenManager.LineBatch.DrawLine(

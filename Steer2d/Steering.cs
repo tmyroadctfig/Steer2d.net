@@ -23,102 +23,31 @@ using Steer2d.Utility;
 
 namespace Steer2d
 {
-    public static class Steering
+    /// <summary>
+    /// The base class for vehicle steering.
+    /// </summary>
+    public abstract class Steering
     {
-        public static Vector2 Pursue(IMovingObstacle vehicle, IMovingObstacle quarry)
+        /// <summary>
+        /// The vehicle steering is working on.
+        /// </summary>
+        public IVehicle Vehicle { get; protected set; }
+
+        /// <summary>
+        /// Creates a new steering instance.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to use.</param>
+        public Steering(IVehicle vehicle)
         {
-            // How parallel is the quarry velocity compared to the vehicle velocity
-            // 1 is parallel, 0 is perpendicular, -1 anti-parallel
-            float parallel = Vector2.Dot(quarry.Velocity, vehicle.Velocity);
-
-            if (parallel < -0.5)
-            {
-                return Seek(vehicle.Position, quarry.Position);
-            }
-
-            float predictionTime = 1; // MathHelper.SmoothStep(-1, 1, parallel);
-
-            Vector2 predictedQuarryPosition = quarry.Position + (quarry.Velocity * predictionTime);
-
-            float distanceToQuarry = (vehicle.Position - quarry.Position).Length();
-
-            //if (vehicle.Velocity.Length() > distanceToQuarry)
-            //{
-            //    predictedQuarryPosition = quarry.Position;
-            //}
-
-            return Seek(vehicle.Position, predictedQuarryPosition);            
+            Vehicle = vehicle;
         }
 
         /// <summary>
-        /// Steers towards a target.
+        /// Seeks to a target point.
         /// </summary>
-        /// <param name="position">The current position.</param>
-        /// <param name="target">The target position.</param>
-        /// <returns>The direction.</returns>
-        public static Vector2 Seek(Vector2 position, Vector2 target)
-        {
-            Vector2 desiredDirection = target - position;
-            return desiredDirection;
-        }
-
-        /// <summary>
-        /// Steers towards a target.
-        /// </summary>
-        /// <param name="position">The current position.</param>
-        /// <param name="target">The target position.</param>
-        /// <returns>The direction.</returns>
-        public static Vector2 Seek(IVehicle vehicle, Vector2 target, float elapsedTime)
-        {
-            Vector2 desiredDirection = target - vehicle.Position;
-            return desiredDirection;
-        }
-
-        public static SteeringComponents GetComponents(Vector2 direction, Vector2 steeringForce)
-        {
-            return new SteeringComponents()
-            {
-                SteeringForce = steeringForce,
-                Rotation = VectorUtils.FindAngleBetweenTwoVectors(direction, steeringForce),
-                Thrust = Vector2.Dot(direction, steeringForce)
-            };
-        }
-
-        public static SteeringComponents GetComponents(IVehicle vehicle, Vector2 steeringForce, float elapsedTime)
-        {
-            var rotation = VectorUtils.FindAngleBetweenTwoVectors(vehicle.Direction, steeringForce);
-            
-            var maxRotation = vehicle.RotationRate * elapsedTime;
-
-            if (Math.Abs(rotation) > maxRotation)
-            {
-                rotation = MathHelper.Clamp(rotation, -maxRotation, maxRotation);
-            }
-
-            steeringForce.Normalize();
-            var thrust = Vector2.Dot(vehicle.Direction, steeringForce);
-
-            // How parallel is the steering force compared to the vehicle direction
-            // 1 is parallel, 0 is perpendicular, -1 anti-parallel
-            float parallel = Vector2.Dot(vehicle.Direction, steeringForce);
-
-            if (parallel > 0)
-            {
-                thrust *= vehicle.MaximumThrust;
-            }
-            else
-            {
-                thrust *= vehicle.MaximumReverseThrust;
-            }
-
-            thrust *= elapsedTime;
-
-            return new SteeringComponents()
-            {
-                SteeringForce = steeringForce,
-                Rotation = rotation,
-                Thrust = thrust
-            };
-        }
+        /// <param name="target">The target to seek to.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        public abstract SteeringComponents Seek(Vector2 target, float elapsedTime);
     }
 }

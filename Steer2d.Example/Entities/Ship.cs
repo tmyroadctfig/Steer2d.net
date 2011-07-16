@@ -86,5 +86,25 @@ namespace Steer2d.Example.Entities
             thrust *= ConvertUnits.ToSimUnits(100);
             lineBatch.DrawLine(Body.Position, Body.Position + thrust, Color.Green);
         }
+
+        public void ApplySteering(SteeringComponents steeringComponents1)
+        {
+            if (steeringComponents1.IsValid)
+            {
+                // Apply rotation
+                Body.Rotation -= steeringComponents1.Rotation;
+                Body.AngularVelocity = 0;
+
+                // Apply thrust
+                var thrust = Direction;
+                thrust.Normalize();
+                thrust *= steeringComponents1.Thrust;
+                Thrust = thrust;
+
+                Body.LinearVelocity += thrust;
+            }
+
+            LimitVelocity();
+        }
     }
 }
