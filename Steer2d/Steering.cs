@@ -71,13 +71,32 @@ namespace Steer2d
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
         public virtual SteeringComponents ArriveAt(Vector2 target, float elapsedTime)
-        {
-            // TODO: actually arrive instead of seeking.
-
+        {            
             var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
-            var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
+            var distanceToTarget = (target - estimatedPosition).Length();
+            var stoppingDisance = Vehicle.GetStoppingDistance();
 
-            return GetComponents(steeringForce, elapsedTime);
+            if (distanceToTarget > stoppingDisance)
+            {
+                var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
+                return GetComponents(steeringForce, elapsedTime);
+            }
+            else
+            {
+                return ArriveAtImpl(distanceToTarget, stoppingDisance, 
+                    SteeringHelper.Seek(estimatedPosition, target), elapsedTime);
+            }
         }
+
+        /// <summary>
+        /// Arrives at the target based on the given parameters.
+        /// </summary>
+        /// <param name="distanceToTarget">The distance to the target.</param>
+        /// <param name="stoppingDisance">The minimum stopping distance.</param>
+        /// <param name="steeringForce">The steering force.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        protected abstract SteeringComponents ArriveAtImpl(float distanceToTarget, float stoppingDisance, 
+            Vector2 steeringForce, float elapsedTime);
     }
 }

@@ -23,11 +23,13 @@ namespace Steer2d
 {
     public static class VehicleExtensions
     {
+        /// <summary>
+        /// Gets the stopping distance for the vehicle.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to get the stopping distance for.</param>
+        /// <returns>The stopping distance.</returns>
         public static float GetStoppingDistance(this IVehicle vehicle)
         {
-            //finalPositionDelta = -0.5 * sqr(currentSpeed) / maximumDeceleration
-
-
             // From: v^2 = u^2 + 2as, and since v = 0:            
             // s = u^2 / 2a
             return vehicle.Velocity.LengthSquared() / 2 * vehicle.MaximumReverseThrust;
