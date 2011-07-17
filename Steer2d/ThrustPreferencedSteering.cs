@@ -16,7 +16,8 @@ namespace Steer2d
 
         public override SteeringComponents Seek(Vector2 target, float elapsedTime)
         {
-            var steeringForce = SteeringHelper.Seek(Vehicle.Position, target);
+            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
+            var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
 
             return GetComponents(Vehicle, steeringForce, elapsedTime);
         }

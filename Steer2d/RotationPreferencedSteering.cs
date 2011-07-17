@@ -24,7 +24,9 @@ namespace Steer2d
 
         public override SteeringComponents Seek(Vector2 target, float elapsedTime)
         {
-            var steeringForce = SteeringHelper.Seek(Vehicle.Position, target);
+            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
+            var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
+
             return GetComponents(steeringForce, elapsedTime);
         }
 
@@ -37,8 +39,6 @@ namespace Steer2d
         /// <returns>The steering components.</returns>
         public SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime)
         {
-            // TODO: actually preference rotation!!
-
             var rotation = VectorUtils.FindAngleBetweenTwoVectors(Vehicle.Direction, steeringForce);
 
             var maxRotation = Vehicle.RotationRate * elapsedTime;
@@ -53,7 +53,7 @@ namespace Steer2d
 
             float thrust = 0;
 
-            if (Math.Abs(rotation) < NonRotationWindow)
+            if (Math.Abs(rotation) < NonRotationWindow || Math.Abs(rotation - Math.PI) < NonRotationWindow)
             {
                 thrust = Vector2.Dot(Vehicle.Direction, steeringForce);
                 
