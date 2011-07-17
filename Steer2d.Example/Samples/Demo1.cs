@@ -16,14 +16,15 @@ namespace FarseerPhysics.SamplesFramework
         private bool OnlyUpdateOnKeyPress { get; set; }
         private Border _border;
         private Ship _ship1;
-        private RotationPreferencedSteering _steering1;
+        private Steering _steering1;
         private Ship _ship2;
-        private RotationPreferencedSteering _steering2;
+        private Steering _steering2;
         private Random _random = new Random();
+        private Vector2 _target = Vector2.Zero;
 
         public Demo1()
         {
-            OnlyUpdateOnKeyPress = true;
+            OnlyUpdateOnKeyPress = false;
         }
 
         public override void HandleInput(InputHelper input, GameTime gameTime)
@@ -67,16 +68,22 @@ namespace FarseerPhysics.SamplesFramework
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var steeringComponents1 = _steering1.Seek(Vector2.Zero, elapsedTime);
+            var steeringComponents1 = _steering1.Seek(_target, elapsedTime);
             _ship1.ApplySteering(steeringComponents1);
 
-            var steeringComponents2 = _steering2.Seek(Vector2.Zero, elapsedTime);
+            var steeringComponents2 = _steering2.Seek(_target, elapsedTime);
             _ship2.ApplySteering(steeringComponents2);
 
-            //if (VectorUtils.EqualsWithin(_ship.Body.Position, Vector2.Zero, 0.5f))
-            //{
-            //    ResetShip();
-            //}
+            if (VectorUtils.EqualsWithin(_ship1.Position, _target, 0.5f) ||
+                VectorUtils.EqualsWithin(_ship2.Position, _target, 0.5f))
+            {
+                var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
+                var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
+
+                _target = new Vector2(
+                    width / 2 - _random.Next((int)width),
+                    height / 2 - _random.Next((int)height));
+            }
         }
 
         #region IDemoScreen Members
@@ -104,10 +111,12 @@ namespace FarseerPhysics.SamplesFramework
             _border = new Border(World, this, ScreenManager.GraphicsDevice.Viewport);
 
             _ship1 = new Ship(World);
+            _ship1.Colour = Color.Cyan;
             _steering1 = new RotationPreferencedSteering(_ship1);
 
             _ship2 = new Ship(World);
-            _steering2 = new RotationPreferencedSteering(_ship2);
+            _ship2.Colour = Color.Magenta;
+            _steering2 = new ThrustPreferencedSteering(_ship2);
 
             ResetShip();
         }
@@ -118,18 +127,17 @@ namespace FarseerPhysics.SamplesFramework
 
             ScreenManager.SpriteBatch.DrawString(
                 ScreenManager.Fonts.DetailsFont,
-                string.Format("x:{0:0.00} y:{1:0.00}", _ship1.Position.X, _ship1.Position.Y),
+                string.Format("ship1 - rotational x:{0:0.00} y:{1:0.00}", _ship1.Position.X, _ship1.Position.Y),
                 new Vector2(2, 2),
-                Color.White);
+                _ship1.Colour);
             ScreenManager.SpriteBatch.DrawString(
                 ScreenManager.Fonts.DetailsFont,
-                string.Format("x:{0:0.00} y:{1:0.00}", _ship2.Position.X, _ship2.Position.Y),
+                string.Format("ship2 - thrust     x:{0:0.00} y:{1:0.00}", _ship2.Position.X, _ship2.Position.Y),
                 new Vector2(2, 22),
-                Color.White);
+                _ship2.Colour);
 
             ScreenManager.SpriteBatch.End();
-
-
+            
             _border.Draw();
 
             ScreenManager.LineBatch.Begin(Camera.SimProjection, Camera.SimView);
@@ -139,12 +147,12 @@ namespace FarseerPhysics.SamplesFramework
 
             // Draw the target
             ScreenManager.LineBatch.DrawLine(
-                new Vector2(0, 0),
-                new Vector2(0, 10));
+                new Vector2(0, 0) + _target,
+                new Vector2(0, 5) + _target);
 
             ScreenManager.LineBatch.DrawLine(
-                 new Vector2(0, 0),
-                 new Vector2(10, 0));
+                 new Vector2(0, 0) + _target,
+                 new Vector2(5, 0) + _target);
 
             ScreenManager.LineBatch.End();
 

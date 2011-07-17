@@ -56,7 +56,7 @@ namespace Steer2d
             }
 
             thrust *= elapsedTime;
-
+            
             return new SteeringComponents()
             {
                 SteeringForce = steeringForce,

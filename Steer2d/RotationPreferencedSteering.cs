@@ -12,13 +12,20 @@ namespace Steer2d
     /// </summary>
     public class RotationPreferencedSteering : Steering
     {
-        public RotationPreferencedSteering(IVehicle vehicle) : base(vehicle) { }
+        public RotationPreferencedSteering(IVehicle vehicle) : base(vehicle) 
+        {
+            NonRotationWindow = MathHelper.ToRadians(15);
+        }
+
+        /// <summary>
+        /// The angle allowed before only rotation will be applied (in radians). E.g. don't only rotate if +/- 15 deg. of the target.
+        /// </summary>
+        public float NonRotationWindow { get; set; }
 
         public override SteeringComponents Seek(Vector2 target, float elapsedTime)
         {
             var steeringForce = SteeringHelper.Seek(Vehicle.Position, target);
-
-            return GetComponents(Vehicle, steeringForce, elapsedTime);
+            return GetComponents(steeringForce, elapsedTime);
         }
 
         /// <summary>
@@ -28,41 +35,48 @@ namespace Steer2d
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public static SteeringComponents GetComponents(IVehicle vehicle, Vector2 steeringForce, float elapsedTime)
+        public SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime)
         {
             // TODO: actually preference rotation!!
 
-            var rotation = VectorUtils.FindAngleBetweenTwoVectors(vehicle.Direction, steeringForce);
+            var rotation = VectorUtils.FindAngleBetweenTwoVectors(Vehicle.Direction, steeringForce);
 
-            var maxRotation = vehicle.RotationRate * elapsedTime;
+            var maxRotation = Vehicle.RotationRate * elapsedTime;
+            var clampedRotation = rotation;
 
             if (Math.Abs(rotation) > maxRotation)
             {
-                rotation = MathHelper.Clamp(rotation, -maxRotation, maxRotation);
+                clampedRotation = MathHelper.Clamp(rotation, -maxRotation, maxRotation);
             }
 
             steeringForce.Normalize();
-            var thrust = Vector2.Dot(vehicle.Direction, steeringForce);
 
-            // How parallel is the steering force compared to the vehicle direction
-            // 1 is parallel, 0 is perpendicular, -1 anti-parallel
-            float parallel = Vector2.Dot(vehicle.Direction, steeringForce);
+            float thrust = 0;
 
-            if (parallel > 0)
+            if (Math.Abs(rotation) < NonRotationWindow)
             {
-                thrust *= vehicle.MaximumThrust;
-            }
-            else
-            {
-                thrust *= vehicle.MaximumReverseThrust;
-            }
+                thrust = Vector2.Dot(Vehicle.Direction, steeringForce);
+                
+                // How parallel is the steering force compared to the vehicle direction
+                // 1 is parallel, 0 is perpendicular, -1 anti-parallel
+                float parallel = Vector2.Dot(Vehicle.Direction, steeringForce);
 
-            thrust *= elapsedTime;
+                if (parallel > 0)
+                {
+                    thrust *= Vehicle.MaximumThrust;
+                }
+                else
+                {
+                    thrust *= Vehicle.MaximumReverseThrust;
+                }
+
+                thrust *= elapsedTime;
+            }
 
             return new SteeringComponents()
             {
                 SteeringForce = steeringForce,
-                Rotation = rotation,
+                Rotation = clampedRotation,
                 Thrust = thrust
             };
         }

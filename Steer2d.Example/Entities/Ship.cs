@@ -33,6 +33,7 @@ namespace Steer2d.Example.Entities
             MaximumThrust = ConvertUnits.ToSimUnits(1000);
             MaximumReverseThrust = ConvertUnits.ToSimUnits(1000);
             RotationRate = (float) Math.PI * 2;
+            Colour = Color.Red;
         }
 
         public float Radius { get { return 25; } }
@@ -50,6 +51,8 @@ namespace Steer2d.Example.Entities
             get { return Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(Body.Rotation)); }
         }
 
+        public Color Colour { get; set; }
+
         public float MaximumSpeed { get; set; }
 
         public float MaximumThrust { get; set; }
@@ -62,8 +65,11 @@ namespace Steer2d.Example.Entities
         {
             if (Body.LinearVelocity.Length() > MaximumSpeed)
             {
-                Body.LinearVelocity.Normalize();
-                Body.LinearVelocity *= MaximumSpeed;
+                var limitedVelocity = Body.LinearVelocity;
+                limitedVelocity.Normalize();
+                limitedVelocity *= MaximumSpeed;
+
+                Body.LinearVelocity = limitedVelocity;
             }
         }
 
@@ -74,17 +80,17 @@ namespace Steer2d.Example.Entities
             var v1 = Vector2.Transform(new Vector2(0, -ConvertUnits.ToSimUnits(20)), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
             var v2 = Vector2.Transform(new Vector2(ConvertUnits.ToSimUnits(10), ConvertUnits.ToSimUnits(5)), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
             var v3 = Vector2.Transform(new Vector2(ConvertUnits.ToSimUnits(-10), ConvertUnits.ToSimUnits(5)), Matrix.CreateRotationZ(Body.Rotation)) + Body.Position;
-            
-            lineBatch.DrawLine(v1, v2, Color.Red);
-            lineBatch.DrawLine(v2, v3, Color.Red);
-            lineBatch.DrawLine(v3, v1, Color.Red);
+
+            lineBatch.DrawLine(v1, v2, Colour);
+            lineBatch.DrawLine(v2, v3, Colour);
+            lineBatch.DrawLine(v3, v1, Colour);
             
             lineBatch.DrawLine(Body.Position, Body.Position + Velocity, Color.Blue);
 
             var thrust = Thrust;
             thrust.Normalize();
             thrust *= ConvertUnits.ToSimUnits(100);
-            lineBatch.DrawLine(Body.Position, Body.Position + thrust, Color.Green);
+            lineBatch.DrawLine(Body.Position, Body.Position + thrust, Color.Orange);
         }
 
         public void ApplySteering(SteeringComponents steeringComponents1)
