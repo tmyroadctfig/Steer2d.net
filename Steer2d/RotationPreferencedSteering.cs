@@ -22,14 +22,6 @@ namespace Steer2d
         /// </summary>
         public float NonRotationWindow { get; set; }
 
-        public override SteeringComponents Seek(Vector2 target, float elapsedTime)
-        {
-            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
-            var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
-
-            return GetComponents(steeringForce, elapsedTime);
-        }
-
         /// <summary>
         /// Gets the steering components for the steering force and vehicle.
         /// </summary>
@@ -37,7 +29,7 @@ namespace Steer2d
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime)
+        public override SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime)
         {
             var rotation = VectorUtils.FindAngleBetweenTwoVectors(Vehicle.Direction, steeringForce);
 

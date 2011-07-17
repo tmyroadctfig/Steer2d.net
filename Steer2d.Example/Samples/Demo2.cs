@@ -1,210 +1,168 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using DemoBaseXNA.ScreenSystem;
-//using DemoBaseXNA.DrawingSystem;
-//using FarseerGames.FarseerPhysics.Dynamics;
-//using FarseerGames.FarseerPhysics;
-//using Microsoft.Xna.Framework;
-//using DemoBaseXNA;
-//using Microsoft.Xna.Framework.Graphics;
-//using FarseerGames.FarseerPhysics.Factories;
-//using Microsoft.Xna.Framework.Input;
-//using Steer2d.Example.Entities;
-//using Steer2d.Utility;
+﻿using System.Text;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Steer2d.Utility;
+using Steer2d;
+using Steer2d.Example.Entities;
+using System;
+using Microsoft.Xna.Framework.Input;
 
-//namespace Steer2d.Example.Demos
-//{
-//    public class Demo2 : GameScreen
-//    {
-//        private SpriteFont _spriteFont;
-//        private LineBrush _lineBrush;
-//        private Ship _playerShip;
-//        private Ship _otherShip;
+namespace FarseerPhysics.SamplesFramework
+{
+    /// <summary>
+    /// Demo2 arrival.
+    /// </summary>
+    internal class Demo2 : PhysicsGameScreen, IDemoScreen
+    {
+        private bool OnlyUpdateOnKeyPress { get; set; }
+        private Border _border;
+        private Ship _ship1;
+        private Steering _steering1;
+        private Ship _ship2;
+        private Steering _steering2;
+        private Random _random = new Random();
+        private Vector2 _target = Vector2.Zero;
 
-//        public override void Initialize()
-//        {
-//            PhysicsSimulator = new PhysicsSimulator(new Vector2(0, 0));
-//            PhysicsSimulatorView = new PhysicsSimulatorView(PhysicsSimulator);
+        public Demo2()
+        {
+            OnlyUpdateOnKeyPress = false;
+        }
+
+        public override void HandleInput(InputHelper input, GameTime gameTime)
+        {
+            base.HandleInput(input, gameTime);
+
+            if (OnlyUpdateOnKeyPress && input.IsNewKeyPress(Keys.N))
+            {
+                UpdateShip(gameTime);
+            }
+
+            if (VectorUtils.EqualsWithin(_ship1.Position, _target, 0.5f) ||
+                VectorUtils.EqualsWithin(_ship2.Position, _target, 0.5f))
+            {
+                if (input.IsNewKeyPress(Keys.Space))
+                {
+                    var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
+                    var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
+
+                    _target = new Vector2(
+                        width / 2 - _random.Next((int)width),
+                        height / 2 - _random.Next((int)height));
+                }
+            }
+        }
+
+        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+        {
+            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+
+            if (!OnlyUpdateOnKeyPress)
+            {
+                UpdateShip(gameTime);
+            }
+        }
+
+        private void ResetShip()
+        {
+            _ship1.Body.ResetDynamics();
+            _ship2.Body.ResetDynamics();
+
+            var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
+            var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
+
+            _ship1.Position += new Vector2(
+                width / 2 - _random.Next((int)width),
+                height / 2 - _random.Next((int)height));
+
+            _ship2.Position += new Vector2(
+                width / 2 - _random.Next((int)width),
+                height / 2 - _random.Next((int)height));
+        }
+
+        private void UpdateShip(GameTime gameTime)
+        {
+            float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             
-//            base.Initialize();
-//        }
+            var steeringComponents1 = _steering1.ArriveAt(_target, elapsedTime);
+            _ship1.ApplySteering(steeringComponents1);
 
-//        public override void LoadContent()
-//        {
-//            //load texture that will visually represent the physics body
-//            _lineBrush = new LineBrush(2, Color.Black);
-//            _lineBrush.Load(ScreenManager.GraphicsDevice);
+            var steeringComponents2 = _steering2.ArriveAt(_target, elapsedTime);
+            _ship2.ApplySteering(steeringComponents2);
+        }
 
-//            _spriteFont = ScreenManager.ContentManager.Load<SpriteFont>(@"Content\Fonts\diagnosticFont");
-            
-//            _playerShip = new Ship(PhysicsSimulator);
-//            _playerShip.Position = ScreenManager.ScreenCenter;
+        #region IDemoScreen Members
 
-//            _otherShip = new Ship(PhysicsSimulator);
-//            _otherShip.Position = ScreenManager.ScreenCenter + new Vector2(50, 0);
-//            _otherShip.Body.IsQuadraticDragEnabled = true;
-//            _otherShip.MaximumThrust = 50;
+        public string GetTitle()
+        {
+            return "Demo2: Arrival at a point";
+        }
 
-//            base.LoadContent();
-//        }
+        public string GetDetails()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("This demo shows vehicles arriving to a point");
+            return sb.ToString();
+        }
 
-//        public override void Draw(GameTime gameTime)
-//        {
-//            ScreenManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            
-//            _playerShip.Draw(ScreenManager.SpriteBatch, _lineBrush);
-//            _otherShip.Draw(ScreenManager.SpriteBatch, _lineBrush);
+        #endregion
 
-//            ScreenManager.SpriteBatch.DrawString(_spriteFont, _angleInfo, _otherShip.Position + new Vector2(20, 20), Color.Black);
+        public override void LoadContent()
+        {
+            base.LoadContent();
 
-//            ScreenManager.SpriteBatch.End();
+            World.Gravity = Vector2.Zero;
 
-//            base.Draw(gameTime);
-//        }
+            _border = new Border(World, this, ScreenManager.GraphicsDevice.Viewport);
 
-//        public override void HandleInput(InputState input, GameTime gameTime)
-//        {
-//            if (firstRun)
-//            {
-//                ScreenManager.AddScreen(new PauseScreen(GetTitle(), GetDetails()));
-//                firstRun = false;
-//            }
+            _ship1 = new Ship(World);
+            _ship1.Colour = Color.Cyan;
+            _steering1 = new RotationPreferencedSteering(_ship1);
 
-//            if (input.PauseGame)
-//            {
-//                ScreenManager.AddScreen(new PauseScreen(GetTitle(), GetDetails()));
-//            }
+            _ship2 = new Ship(World);
+            _ship2.Colour = Color.Magenta;
+            _steering2 = new ThrustPreferencedSteering(_ship2);
 
-//            if (input.CurrentGamePadState.IsConnected)
-//            {
-//                HandleGamePadInput(input);
-//            }
-//            else
-//            {
-//                HandleKeyboardInput(input, gameTime);
-//            }
+            ResetShip();
+        }
 
-//            base.HandleInput(input, gameTime);
-//        }
+        public override void Draw(GameTime gameTime)
+        {
+            ScreenManager.SpriteBatch.Begin(0, null, null, null, null, null, Camera.View);
 
-//        private void HandleGamePadInput(InputState input)
-//        {
-//            Vector2 force = 500 * input.CurrentGamePadState.ThumbSticks.Left;
-//            force.Y = -force.Y;
-//            force = Vector2.Transform(force, Matrix.CreateRotationZ(_playerShip.Body.Rotation));
-//            _playerShip.Body.ApplyForce(force);
+            ScreenManager.SpriteBatch.DrawString(
+                ScreenManager.Fonts.DetailsFont,
+                string.Format("ship1 - rotational x:{0:0.00} y:{1:0.00}", _ship1.Position.X, _ship1.Position.Y),
+                new Vector2(2, 2),
+                _ship1.Colour);
+            ScreenManager.SpriteBatch.DrawString(
+                ScreenManager.Fonts.DetailsFont,
+                string.Format("ship2 - thrust     x:{0:0.00} y:{1:0.00}", _ship2.Position.X, _ship2.Position.Y),
+                new Vector2(2, 22),
+                _ship2.Colour);
 
-//            float rotation = -1000 * input.CurrentGamePadState.Triggers.Left;
-//            _playerShip.Body.ApplyTorque(rotation);
+            ScreenManager.SpriteBatch.End();
 
-//            rotation = 1000 * input.CurrentGamePadState.Triggers.Right;
-//            _playerShip.Body.ApplyTorque(rotation);
-//        }
+            _border.Draw();
 
-//        private void HandleKeyboardInput(InputState input, GameTime gameTime)
-//        {
-//            const float forceAmount = 5000;
-//            Vector2 force = Vector2.Zero;
-//            force.Y = -force.Y;
+            ScreenManager.LineBatch.Begin(Camera.SimProjection, Camera.SimView);
 
-//            if (input.CurrentKeyboardState.IsKeyDown(Keys.Up)) { force += new Vector2(0, -forceAmount); }
-//            if (input.CurrentKeyboardState.IsKeyDown(Keys.S)) { force += new Vector2(0, forceAmount); }
-//            if (input.CurrentKeyboardState.IsKeyDown(Keys.Down)) { force += new Vector2(0, forceAmount); }
-//            if (input.CurrentKeyboardState.IsKeyDown(Keys.W)) { force += new Vector2(0, -forceAmount); }
+            _ship1.Draw(ScreenManager.LineBatch);
+            _ship2.Draw(ScreenManager.LineBatch);
 
-//            force = Vector2.Transform(force, Matrix.CreateRotationZ(_playerShip.Body.Rotation));
-//            _playerShip.Thrust = force;
-//            _playerShip.Body.ApplyForce(force);
+            // Draw the target
+            ScreenManager.LineBatch.DrawLine(
+                new Vector2(0, 0) + _target,
+                new Vector2(0, 5) + _target);
 
-//            //const float torqueAmount = 1000;
-//            //float torque = 0;
+            ScreenManager.LineBatch.DrawLine(
+                 new Vector2(0, 0) + _target,
+                 new Vector2(5, 0) + _target);
 
-//            //if (input.CurrentKeyboardState.IsKeyDown(Keys.Left)) { torque -= torqueAmount; }
-//            //if (input.CurrentKeyboardState.IsKeyDown(Keys.Right)) { torque += torqueAmount; }
+            ScreenManager.LineBatch.End();
 
-//            //_playerShip.Body.ApplyTorque(torque);
-
-//            if (input.CurrentKeyboardState.IsKeyDown(Keys.Left) ||
-//                input.CurrentKeyboardState.IsKeyDown(Keys.Right))
-//            {
-//                _playerShip.Body.AngularVelocity = 0;
-//                _playerShip.Body.ClearTorque();
-
-//                int rotateAmount = 0;
-
-//                if (input.CurrentKeyboardState.IsKeyDown(Keys.Left)) { rotateAmount -= 180; }
-//                if (input.CurrentKeyboardState.IsKeyDown(Keys.Right)) { rotateAmount += 180; }
-
-//                _playerShip.Body.Rotation += MathHelper.ToRadians((float)(rotateAmount * gameTime.ElapsedGameTime.TotalSeconds));
-//            }
-
-
-
-//            Vector2 steeringForce = Steering.Pursue(_otherShip, _playerShip);
-
-//            if (!float.IsNaN(steeringForce.X) &&
-//                !float.IsNaN(steeringForce.Y) && 
-//                steeringForce.Length() != 0)
-//            {
-//                if (steeringForce.Length() > 1.001f)
-//                {
-//                    steeringForce.Normalize();
-//                }
-
-//                // Apply rotation
-//                float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-//                var direction = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(_otherShip.Body.Rotation)); //new Vector2((float)Math.Sin(_otherShip.Body.Rotation), -(float)Math.Cos(_otherShip.Body.Rotation));
-
-//                float angle = VectorUtils.FindAngleBetweenTwoVectors(direction, steeringForce);
-//                _angleInfo = string.Format("{0}deg", MathHelper.ToDegrees(angle));
-
-//                if (!float.IsNaN(angle))
-//                {
-//                    //angle = MathHelper.Clamp(angle, -elapsedTime * 4, elapsedTime * 4);
-//                    _otherShip.Body.Rotation -= angle;
-
-//                    _otherShip.Body.AngularVelocity = 0;
-//                    _otherShip.Body.ClearTorque();
-//                }
-
-//                // Apply thrust
-//                float thrustMagnitude = Vector2.Dot(direction, steeringForce);
-//                var thrust = direction;
-//                thrust.Normalize();
-//                thrust *= thrustMagnitude * 5000;
-//                _otherShip.Thrust = thrust;
-
-//                //_otherShip.Body.LinearVelocity = Vector2.Zero;
-//                _otherShip.Body.LinearVelocity += thrust * elapsedTime;
-//            }
-
-//            _playerShip.LimitVelocity();
-//            _otherShip.LimitVelocity();
-//        }
-
-//        string _angleInfo = "";
-
-//        public static string GetTitle()
-//        {
-//            return "Demo2: A Single Pursuer";
-//        }
-
-//        public static string GetDetails()
-//        {
-//            StringBuilder sb = new StringBuilder();
-//            sb.AppendLine("This demo shows a single body with no geometry");
-//            sb.AppendLine("attached. Note that it does not collide with the borders.");
-//            sb.AppendLine(string.Empty);
-//            sb.AppendLine("GamePad:");
-//            sb.AppendLine("  -Rotate: left and right triggers");
-//            sb.AppendLine("  -Move: left thumbstick");
-//            sb.AppendLine(string.Empty);
-//            sb.AppendLine("Keyboard:");
-//            sb.AppendLine("  -Rotate: left and right arrows");
-//            sb.AppendLine("  -Move: A,S,D,W");
-//            return sb.ToString();
-//        }
-//    }
-//}
+            base.Draw(gameTime);
+        }
+    }
+}

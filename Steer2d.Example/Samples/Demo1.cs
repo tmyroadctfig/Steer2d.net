@@ -11,6 +11,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace FarseerPhysics.SamplesFramework
 {
+    /// <summary>
+    /// Demo1 seeking to a point.
+    /// </summary>
     internal class Demo1 : PhysicsGameScreen, IDemoScreen
     {
         private bool OnlyUpdateOnKeyPress { get; set; }
@@ -96,7 +99,7 @@ namespace FarseerPhysics.SamplesFramework
         public string GetDetails()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("This demo shows a single vehicle seeking to a point");
+            sb.AppendLine("This demo shows vehicles seeking to a point");
             return sb.ToString();
         }
 

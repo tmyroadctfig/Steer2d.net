@@ -157,7 +157,6 @@
     <Compile Include="ScreenSystem\MenuEntry.cs" />
     <Compile Include="ScreenSystem\MenuScreen.cs" />
     <Compile Include="ScreenSystem\MessageBoxScreen.cs" />
-    <Compile Include="Samples\SimpleDemo1.cs" />
     <Compile Include="ScreenSystem\VirtualButton.cs" />
     <Compile Include="ScreenSystem\VirtualStick.cs" />
   </ItemGroup>

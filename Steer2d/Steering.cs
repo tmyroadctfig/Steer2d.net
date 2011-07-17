@@ -43,11 +43,41 @@ namespace Steer2d
         }
 
         /// <summary>
+        /// Gets the steering components for the steering force and vehicle.
+        /// </summary>
+        /// <param name="steeringForce">The steering force.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        public abstract SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime);
+
+        /// <summary>
         /// Seeks to a target point.
         /// </summary>
         /// <param name="target">The target to seek to.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public abstract SteeringComponents Seek(Vector2 target, float elapsedTime);
+        public virtual SteeringComponents Seek(Vector2 target, float elapsedTime)
+        {
+            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
+            var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
+
+            return GetComponents(steeringForce, elapsedTime);
+        }
+
+        /// <summary>
+        /// Arrives at a target point, stopping on arrival.
+        /// </summary>
+        /// <param name="target">The target to arrive at.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        public virtual SteeringComponents ArriveAt(Vector2 target, float elapsedTime)
+        {
+            // TODO: actually arrive instead of seeking.
+
+            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
+            var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
+
+            return GetComponents(steeringForce, elapsedTime);
+        }
     }
 }
