@@ -55,14 +55,18 @@ namespace FarseerPhysics.SamplesFramework
         {
             base.Initialize();
 
-            Demo1 demo1 = new Demo1();
-            Demo2 demo2 = new Demo2();
+            var demo1 = new Demo1();
+            var demo2 = new Demo2();
+            var demo3 = new Demo3();
+            var demo4 = new Demo4();
 
             MenuScreen menuScreen = new MenuScreen("Farseer Samples");
 
             menuScreen.AddMenuItem("Simple Samples", EntryType.Separator, null);
             menuScreen.AddMenuItem(demo1.GetTitle(), EntryType.Screen, demo1);
             menuScreen.AddMenuItem(demo2.GetTitle(), EntryType.Screen, demo2);
+            menuScreen.AddMenuItem(demo3.GetTitle(), EntryType.Screen, demo3);
+            menuScreen.AddMenuItem(demo4.GetTitle(), EntryType.Screen, demo4);
 
             menuScreen.AddMenuItem("", EntryType.Separator, null);
             menuScreen.AddMenuItem("Exit", EntryType.ExitItem, null);

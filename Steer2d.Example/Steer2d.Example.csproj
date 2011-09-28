@@ -127,6 +127,8 @@
     <Compile Include="DrawingSystem\LineBatch.cs" />
     <Compile Include="Entities\FixedObstacle.cs" />
     <Compile Include="Entities\Ship.cs" />
+    <Compile Include="Samples\Demo4.cs" />
+    <Compile Include="Samples\Demo3.cs" />
     <Compile Include="Samples\Demo1.cs" />
     <Compile Include="Samples\Demo2.cs" />
     <Compile Include="ScreenSystem\FramerateCounterComponent.cs" />

@@ -64,5 +64,17 @@ namespace Steer2d
             Vector2 desiredDirection = target - position;
             return desiredDirection;
         }
+
+        /// <summary>
+        /// Steers away from a target.
+        /// </summary>
+        /// <param name="position">The current position.</param>
+        /// <param name="target">The target position.</param>
+        /// <returns>The direction.</returns>
+        public static Vector2 Flee(Vector2 position, Vector2 target)
+        {
+            Vector2 desiredDirection = -Seek(position, target);
+            return desiredDirection;
+        }
     }
 }

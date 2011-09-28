@@ -12,9 +12,9 @@ using Microsoft.Xna.Framework.Input;
 namespace FarseerPhysics.SamplesFramework
 {
     /// <summary>
-    /// Demo2 arrival.
+    /// Demo4 evade.
     /// </summary>
-    internal class Demo2 : PhysicsGameScreen, IDemoScreen
+    internal class Demo4 : PhysicsGameScreen, IDemoScreen
     {
         private bool OnlyUpdateOnKeyPress { get; set; }
         private Border _border;
@@ -25,7 +25,7 @@ namespace FarseerPhysics.SamplesFramework
         private Random _random = new Random();
         private Vector2 _target = Vector2.Zero;
 
-        public Demo2()
+        public Demo4()
         {
             OnlyUpdateOnKeyPress = false;
         }
@@ -39,8 +39,12 @@ namespace FarseerPhysics.SamplesFramework
                 UpdateShip(gameTime);
             }
 
-            if (VectorUtils.EqualsWithin(_ship1.Position, _target, 0.5f) ||
-                VectorUtils.EqualsWithin(_ship2.Position, _target, 0.5f))
+            if (VectorUtils.EqualsWithin(_ship1.Position, _ship2.Position, 2.0f))
+            {
+                ResetShips();
+            }
+
+            if (VectorUtils.EqualsWithin(_ship1.Position, _target, 0.5f))
             {
                 var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
                 var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
@@ -61,7 +65,7 @@ namespace FarseerPhysics.SamplesFramework
             }
         }
 
-        private void ResetShip()
+        private void ResetShips()
         {
             _ship1.Body.ResetDynamics();
             _ship2.Body.ResetDynamics();
@@ -69,11 +73,11 @@ namespace FarseerPhysics.SamplesFramework
             var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
             var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
 
-            _ship1.Position += new Vector2(
+            _ship1.Position = new Vector2(
                 width / 2 - _random.Next((int)width),
                 height / 2 - _random.Next((int)height));
 
-            _ship2.Position += new Vector2(
+            _ship2.Position = new Vector2(
                 width / 2 - _random.Next((int)width),
                 height / 2 - _random.Next((int)height));
         }
@@ -81,11 +85,19 @@ namespace FarseerPhysics.SamplesFramework
         private void UpdateShip(GameTime gameTime)
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            var steeringComponents1 = _steering1.ArriveAt(_target, elapsedTime);
-            _ship1.ApplySteering(steeringComponents1);
 
-            var steeringComponents2 = _steering2.ArriveAt(_target, elapsedTime);
+            if ((_ship1.Position - _ship2.Position).Length() < 15)
+            {
+                var steeringComponents1 = _steering1.Evade(_ship2, elapsedTime);
+                _ship1.ApplySteering(steeringComponents1);
+            }
+            else
+            {
+                var steeringComponents1 = _steering1.Seek(_target, elapsedTime);
+                _ship1.ApplySteering(steeringComponents1);
+            }
+
+            var steeringComponents2 = _steering2.Pursue(_ship1, elapsedTime);
             _ship2.ApplySteering(steeringComponents2);
         }
 
@@ -93,13 +105,13 @@ namespace FarseerPhysics.SamplesFramework
 
         public string GetTitle()
         {
-            return "Demo2: Arrival at a point";
+            return "Demo4: Evade";
         }
 
         public string GetDetails()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("This demo shows vehicles arriving to a point");
+            sb.AppendLine("This demo shows a vehicle (ship1 - cyan) evading another vehicle");
             return sb.ToString();
         }
 
@@ -115,13 +127,15 @@ namespace FarseerPhysics.SamplesFramework
 
             _ship1 = new Ship(World);
             _ship1.Colour = Color.Cyan;
+            _ship1.MaximumSpeed *= 0.5f;
             _steering1 = new RotationPreferencedSteering(_ship1);
 
             _ship2 = new Ship(World);
             _ship2.Colour = Color.Magenta;
+            _ship2.MaximumSpeed *= 0.5f;
             _steering2 = new ThrustPreferencedSteering(_ship2);
 
-            ResetShip();
+            ResetShips();
         }
 
         public override void Draw(GameTime gameTime)

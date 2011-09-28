@@ -22,14 +22,34 @@ using Microsoft.Xna.Framework;
 
 namespace Steer2d
 {
+    /// <summary>
+    /// The interface for a vehicle that steering can direct.
+    /// </summary>
     public interface IVehicle : IMovingObstacle
     {
+        /// <summary>
+        /// The current direction of the vehicle (as a unit vector).
+        /// </summary>
         Vector2 Direction { get; }
 
+        /// <summary>
+        /// The maximum foward thrust.
+        /// </summary>
         float MaximumThrust { get; }
 
+        /// <summary>
+        /// The maximum reverse thrust.
+        /// </summary>
         float MaximumReverseThrust { get; }
 
+        /// <summary>
+        /// The rotation rate in radians / second.
+        /// </summary>
         float RotationRate { get; }
+
+        /// <summary>
+        /// The maximum speed the vehicle can move at.
+        /// </summary>
+        float MaximumSpeed { get; }
     }
 }

@@ -65,6 +65,36 @@ namespace Steer2d
         }
 
         /// <summary>
+        /// Pursues another vehicle.
+        /// </summary>
+        /// <param name="target">The target to pursue.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        public virtual SteeringComponents Pursue(IVehicle target, float elapsedTime)
+        {
+            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
+            var estimatedTagetPosition = target.Position + target.Velocity * elapsedTime;
+            var steeringForce = SteeringHelper.Seek(estimatedPosition, estimatedTagetPosition);
+
+            return GetComponents(steeringForce, elapsedTime);
+        }
+
+        /// <summary>
+        /// Evades another vehicle.
+        /// </summary>
+        /// <param name="target">The target to evade.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        public virtual SteeringComponents Evade(IVehicle target, float elapsedTime)
+        {
+            var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
+            var estimatedTagetPosition = target.Position + target.Velocity * elapsedTime;
+            var steeringForce = SteeringHelper.Flee(estimatedPosition, estimatedTagetPosition);
+
+            return GetComponents(steeringForce, elapsedTime);
+        }
+
+        /// <summary>
         /// Arrives at a target point, stopping on arrival.
         /// </summary>
         /// <param name="target">The target to arrive at.</param>

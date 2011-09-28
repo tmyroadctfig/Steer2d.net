@@ -77,7 +77,17 @@ namespace Steer2d
         protected override SteeringComponents ArriveAtImpl(float distanceToTarget, float stoppingDisance,
             Vector2 steeringForce, float elapsedTime)
         {
-            throw new NotImplementedException();
+            var components = GetComponents(steeringForce, elapsedTime);
+
+            var rampedSpeed = Vehicle.MaximumSpeed * distanceToTarget / stoppingDisance;
+
+            steeringForce.Normalize();
+            if (Vector2.Dot(Vehicle.Velocity, steeringForce) > rampedSpeed)
+            {
+                components.Thrust = -0.01f;
+            }
+
+            return components;
         }
     }
 }
