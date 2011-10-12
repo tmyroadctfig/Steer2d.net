@@ -125,8 +125,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DrawingSystem\LineBatch.cs" />
-    <Compile Include="Entities\FixedObstacle.cs" />
+    <Compile Include="Entities\Obstacle.cs" />
     <Compile Include="Entities\Ship.cs" />
+    <Compile Include="Samples\Demo5.cs" />
     <Compile Include="Samples\Demo4.cs" />
     <Compile Include="Samples\Demo3.cs" />
     <Compile Include="Samples\Demo1.cs" />
@@ -171,6 +172,10 @@
       <Name>Samples XNA Content %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
       <Project>{C8D1B1FB-E7FA-4BCF-BC8A-4D5D93429F67}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Steer2d.FarseerPhysicsImpl\Steer2d.FarseerPhysicsImpl.csproj">
+      <Project>{ED115453-D5D4-4576-A38A-1EB44C03FC93}</Project>
+      <Name>Steer2d.FarseerPhysicsImpl</Name>
     </ProjectReference>
     <ProjectReference Include="..\Steer2d\Steer2d.csproj">
       <Project>{3EC987CB-EDE6-45E8-A8DB-8F6B728F9EF6}</Project>

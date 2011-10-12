@@ -54,5 +54,10 @@ namespace Steer2d
                     !float.IsNaN(Rotation);
             }
         }
+
+        /// <summary>
+        /// A instance to represent no steering force.
+        /// </summary>
+        public static readonly SteeringComponents NoSteering = new SteeringComponents();
     }
 }

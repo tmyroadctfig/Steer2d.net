@@ -26,6 +26,7 @@ namespace Steer2d.Example.Entities
 
             Body = BodyFactory.CreateBody(world);
             Body.BodyType = BodyType.Dynamic;
+            Body.UserData = this;
 
             FixtureFactory.AttachPolygon(vertices, 1, Body);
 

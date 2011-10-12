@@ -7,3 +7,5 @@ Steer2d.Example/obj
 Steer2d.Example.Content/obj
 Steer2d.Example/Samples XNA.csproj.Debug.cachefile
 Steer2d.Example/Steer2d.Example.csproj.user
+Steer2d.FarseerPhysicsImpl/bin
+Steer2d.FarseerPhysicsImpl/obj

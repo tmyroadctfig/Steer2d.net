@@ -3,20 +3,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3EC987CB-EDE6-45E8-A8DB-8F6B728F9EF6}</ProjectGuid>
+    <ProjectGuid>{ED115453-D5D4-4576-A38A-1EB44C03FC93}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Steer2d</RootNamespace>
-    <AssemblyName>Steer2d</AssemblyName>
+    <RootNamespace>Steer2d.FarseerPhysicsImpl</RootNamespace>
+    <AssemblyName>Steer2d.FarseerPhysicsImpl</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,42 +31,30 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Xna.Framework, Version=3.1.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="FarseerPhysicsXNA">
+      <HintPath>..\Dependencies\FarseerPhysics\FarseerPhysicsXNA.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\VehicleExtensions.cs" />
-    <Compile Include="IMovingObstacle.cs" />
-    <Compile Include="IObstacle.cs" />
-    <Compile Include="IPotentialCollisionDetector.cs" />
-    <Compile Include="IVehicle.cs" />
+    <Compile Include="ContactEdgeExtensions.cs" />
+    <Compile Include="IFarseerEntity.cs" />
+    <Compile Include="PotentialCollisionDetector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RotationPreferencedSteering.cs" />
-    <Compile Include="Steering.cs" />
-    <Compile Include="SteeringComponents.cs" />
-    <Compile Include="SteeringHelper.cs" />
-    <Compile Include="ThrustPreferencedSteering.cs" />
-    <Compile Include="Utility\RectangleF.cs" />
-    <Compile Include="Utility\RotatedRectangle.cs" />
-    <Compile Include="Utility\VectorUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Licence.txt">
-      <Link>Licence.txt</Link>
-    </Content>
+    <ProjectReference Include="..\Steer2d\Steer2d.csproj">
+      <Project>{3EC987CB-EDE6-45E8-A8DB-8F6B728F9EF6}</Project>
+      <Name>Steer2d</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

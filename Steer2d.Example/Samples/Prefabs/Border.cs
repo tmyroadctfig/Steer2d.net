@@ -31,6 +31,7 @@ namespace FarseerPhysics.SamplesFramework
             _anchor = BodyFactory.CreateLoopShape(_world, borders);
             _anchor.CollisionCategories = Category.All;
             _anchor.CollidesWith = Category.All;
+            _anchor.UserData = this;
 
             _basicEffect = new BasicEffect(_screen.ScreenManager.GraphicsDevice);
             _basicEffect.VertexColorEnabled = true;
@@ -102,6 +103,28 @@ namespace FarseerPhysics.SamplesFramework
             batch.Begin(_screen.Camera.SimProjection, _screen.Camera.SimView);
             batch.DrawLineShape(_anchor.FixtureList[0].Shape);
             batch.End();
+        }
+
+        public Category CollisionCategories
+        {
+            set
+            {
+                foreach (var f in _anchor.FixtureList)
+                {
+                    f.CollisionCategories = value;
+                }
+            }
+        }
+
+        public Category CollidesWith
+        {
+            set
+            {
+                foreach (var f in _anchor.FixtureList)
+                {
+                    f.CollidesWith = value;
+                }
+            }
         }
     }
 }

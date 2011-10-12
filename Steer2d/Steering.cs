@@ -95,6 +95,40 @@ namespace Steer2d
         }
 
         /// <summary>
+        /// The potential collision detector. Used for obstacle avoidance.
+        /// </summary>
+        public IPotentialCollisionDetector PotentialCollisionDetector { get; set; }
+
+        /// <summary>
+        /// Steers to avoid the given obstacles.
+        /// </summary>
+        /// <param name="obstacles">The obstacles to avoid.</param>
+        /// <param name="detectionPeriod">The time window to perform detection in. E.g. 1 second from current position.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering components.</returns>
+        public SteeringComponents SteerToAvoidObstacles(IEnumerable<IObstacle> obstacles, float detectionPeriod, float elapsedTime)
+        {
+            IObstacle nearestObstacle = PotentialCollisionDetector
+                .FindNearestPotentialCollision(Vehicle, obstacles, detectionPeriod);
+
+            if (nearestObstacle != null)
+            {
+                // Find the steering direction
+                var obstacleOffset = Vehicle.Position - nearestObstacle.Position;
+                var parallel = Vehicle.Direction * Vector2.Dot(obstacleOffset, Vehicle.Direction);
+                var perpendicular = obstacleOffset - parallel;
+
+                // Offset to be past the obstacle's edge
+                perpendicular.Normalize();
+                var seekTo = nearestObstacle.Position + perpendicular * nearestObstacle.Radius * 1.1f;
+
+                return GetComponents(seekTo, elapsedTime);
+            }
+
+            return SteeringComponents.NoSteering;
+        }
+
+        /// <summary>
         /// Arrives at a target point, stopping on arrival.
         /// </summary>
         /// <param name="target">The target to arrive at.</param>
