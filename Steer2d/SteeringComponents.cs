@@ -28,6 +28,11 @@ namespace Steer2d
     public struct SteeringComponents
     {
         /// <summary>
+        /// The target position that relates to the steering force. E.g. the destination point the steering is aiming for.
+        /// </summary>
+        public Vector2 SteeringTarget { get; set; }
+
+        /// <summary>
         /// The original steering force.
         /// </summary>
         public Vector2 SteeringForce { get; set; }

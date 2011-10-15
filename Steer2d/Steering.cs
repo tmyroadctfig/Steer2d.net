@@ -120,7 +120,7 @@ namespace Steer2d
 
                 // Offset to be past the obstacle's edge
                 perpendicular.Normalize();
-                var seekTo = nearestObstacle.Position + perpendicular * nearestObstacle.Radius * 1.1f;
+                var seekTo = nearestObstacle.Position + perpendicular * (nearestObstacle.Radius * 1.1f + Vehicle.Radius * 1.1f);
 
                 return GetComponents(seekTo, elapsedTime);
             }

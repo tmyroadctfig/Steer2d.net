@@ -37,7 +37,7 @@ namespace Steer2d.Example.Entities
             Colour = Color.Red;
         }
 
-        public float Radius { get { return 25; } }
+        public float Radius { get { return ConvertUnits.ToSimUnits(25); } }
 
         public Vector2 Position
         {

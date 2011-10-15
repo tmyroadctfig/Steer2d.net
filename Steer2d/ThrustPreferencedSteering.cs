@@ -48,12 +48,13 @@ namespace Steer2d
                 rotation = MathHelper.Clamp(rotation, -maxRotation, maxRotation);
             }
 
-            steeringForce.Normalize();
-            var thrust = Vector2.Dot(Vehicle.Direction, steeringForce);
+            var normalizedSteeringForce = steeringForce;
+            normalizedSteeringForce.Normalize();
+            var thrust = Vector2.Dot(Vehicle.Direction, normalizedSteeringForce);
 
             // How parallel is the steering force compared to the vehicle direction
             // 1 is parallel, 0 is perpendicular, -1 anti-parallel
-            float parallel = Vector2.Dot(Vehicle.Direction, steeringForce);
+            float parallel = Vector2.Dot(Vehicle.Direction, normalizedSteeringForce);
 
             if (parallel > 0)
             {
@@ -68,7 +69,8 @@ namespace Steer2d
             
             return new SteeringComponents()
             {
-                SteeringForce = steeringForce,
+                SteeringTarget = steeringForce,
+                SteeringForce = normalizedSteeringForce,
                 Rotation = rotation,
                 Thrust = thrust
             };

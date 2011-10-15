@@ -22,8 +22,10 @@ namespace FarseerPhysics.SamplesFramework
         private Border _border;
         private Ship _ship1;
         private Steering _steering1;
+        private SimpleAvoidAi _ship1Ai;
         private Ship _ship2;
         private Steering _steering2;
+        private SimpleAvoidAi _ship2Ai;
         private Random _random = new Random();
         private Vector2 _target = Vector2.Zero;
         private IList<Obstacle> _obstacles = new List<Obstacle>();
@@ -86,16 +88,9 @@ namespace FarseerPhysics.SamplesFramework
         private void UpdateShip(GameTime gameTime)
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                        
-            var steeringComponents1 = _steering1.SteerToAvoidObstacles(_obstacles, 1.0f, elapsedTime);
-            if (steeringComponents1.Equals(SteeringComponents.NoSteering))
-            {
-                steeringComponents1 = _steering1.Seek(_target, elapsedTime);
-            }
-            _ship1.ApplySteering(steeringComponents1);
 
-            var steeringComponents2 = _steering2.Seek(_target, elapsedTime);
-            //_ship2.ApplySteering(steeringComponents2);
+            _ship1Ai.Update(elapsedTime, _target, _obstacles);
+            _ship2Ai.Update(elapsedTime, _target, _obstacles);
         }
 
         #region IDemoScreen Members
@@ -130,6 +125,7 @@ namespace FarseerPhysics.SamplesFramework
             _ship1.Body.CollisionCategories = Category.Cat10;
             _steering1 = new RotationPreferencedSteering(_ship1);
             _steering1.PotentialCollisionDetector = new PotentialCollisionDetector(_ship1.Body, Category.Cat3, Category.Cat2);
+            _ship1Ai = new SimpleAvoidAi(_ship1, _steering1);
 
             _ship2 = new Ship(World);
             _ship2.Colour = Color.Magenta;
@@ -137,6 +133,7 @@ namespace FarseerPhysics.SamplesFramework
             _ship2.Body.CollisionCategories = Category.Cat10;
             _steering2 = new ThrustPreferencedSteering(_ship2);
             _steering2.PotentialCollisionDetector = new PotentialCollisionDetector(_ship2.Body, Category.Cat3, Category.Cat2);
+            _ship2Ai = new SimpleAvoidAi(_ship2, _steering2);
 
             var width = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Width - 100);
             var height = ConvertUnits.ToSimUnits(ScreenManager.GraphicsDevice.Viewport.Height - 100);
@@ -168,12 +165,12 @@ namespace FarseerPhysics.SamplesFramework
 
             ScreenManager.SpriteBatch.DrawString(
                 ScreenManager.Fonts.DetailsFont,
-                string.Format("ship1 - rotational x:{0:0.00} y:{1:0.00}", _ship1.Position.X, _ship1.Position.Y),
+                string.Format("ship1 - rotational x:{0:0.00} y:{1:0.00} ai:{2}", _ship1.Position.X, _ship1.Position.Y, _ship1Ai._aiState),
                 new Vector2(2, 2),
                 _ship1.Colour);
             ScreenManager.SpriteBatch.DrawString(
                 ScreenManager.Fonts.DetailsFont,
-                string.Format("ship2 - thrust     x:{0:0.00} y:{1:0.00}", _ship2.Position.X, _ship2.Position.Y),
+                string.Format("ship2 - thrust     x:{0:0.00} y:{1:0.00} ai:{2}", _ship2.Position.X, _ship2.Position.Y, _ship2Ai._aiState),
                 new Vector2(2, 22),
                 _ship2.Colour);
 
@@ -185,6 +182,9 @@ namespace FarseerPhysics.SamplesFramework
 
             _ship1.Draw(ScreenManager.LineBatch);
             _ship2.Draw(ScreenManager.LineBatch);
+
+            _ship1Ai.Draw(ScreenManager.LineBatch);
+            _ship2Ai.Draw(ScreenManager.LineBatch);
 
             // Draw the target
             ScreenManager.LineBatch.DrawLine(
@@ -199,5 +199,60 @@ namespace FarseerPhysics.SamplesFramework
 
             base.Draw(gameTime);
         }
+    }
+
+    public class SimpleAvoidAi
+    {
+        Ship _ship;
+
+        Steering _steering;
+
+        Vector2 _avoidVector;
+
+        public AiState _aiState;
+
+        public SimpleAvoidAi(Ship ship, Steering steering)
+        {
+            _ship = ship;
+            _steering = steering;
+            _aiState = AiState.SeekTarget;
+        }
+
+        public void Update(float elapsedTime, Vector2 target, IEnumerable<IObstacle> obstacles)
+        {
+            var steeringComponents = _steering.SteerToAvoidObstacles(obstacles, 1.0f, elapsedTime);
+
+            if (steeringComponents.Equals(SteeringComponents.NoSteering))
+            {
+                if (_aiState == AiState.Avoid && (_ship.Position - _avoidVector).Length() > 0.5f)
+                {
+                    steeringComponents = _steering.Seek(_avoidVector, elapsedTime);
+                }
+                else
+                {
+                    _aiState = AiState.SeekTarget;
+                    steeringComponents = _steering.Seek(target, elapsedTime);
+                }
+            }
+            else
+            {
+                _aiState = AiState.Avoid;
+                _avoidVector = steeringComponents.SteeringTarget;
+            }
+
+            _ship.ApplySteering(steeringComponents);
+        }
+
+        public void Draw(LineBatch lineBatch)
+        {
+            lineBatch.DrawLine(_ship.Position, _avoidVector, Color.Red);
+        }
+    }
+
+    public enum AiState
+    {
+        SeekTarget,
+
+        Avoid
     }
 }

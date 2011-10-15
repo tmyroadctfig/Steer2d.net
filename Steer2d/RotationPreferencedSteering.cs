@@ -57,17 +57,18 @@ namespace Steer2d
                 clampedRotation = MathHelper.Clamp(rotation, -maxRotation, maxRotation);
             }
 
-            steeringForce.Normalize();
+            var normalizedSteeringForce = steeringForce;
+            normalizedSteeringForce.Normalize();
 
             float thrust = 0;
 
             if (Math.Abs(rotation) < NonRotationWindow || Math.Abs(rotation - Math.PI) < NonRotationWindow)
             {
-                thrust = Vector2.Dot(Vehicle.Direction, steeringForce);
+                thrust = Vector2.Dot(Vehicle.Direction, normalizedSteeringForce);
                 
                 // How parallel is the steering force compared to the vehicle direction
                 // 1 is parallel, 0 is perpendicular, -1 anti-parallel
-                float parallel = Vector2.Dot(Vehicle.Direction, steeringForce);
+                float parallel = Vector2.Dot(Vehicle.Direction, normalizedSteeringForce);
 
                 if (parallel > 0)
                 {
@@ -83,7 +84,8 @@ namespace Steer2d
 
             return new SteeringComponents()
             {
-                SteeringForce = steeringForce,
+                SteeringTarget = steeringForce,
+                SteeringForce = normalizedSteeringForce,
                 Rotation = clampedRotation,
                 Thrust = thrust
             };
@@ -92,7 +94,17 @@ namespace Steer2d
         protected override SteeringComponents ArriveAtImpl(float distanceToTarget, float stoppingDisance, 
             Vector2 steeringForce, float elapsedTime)
         {
-            throw new NotImplementedException();
+            var components = GetComponents(steeringForce, elapsedTime);
+
+            var rampedSpeed = Vehicle.MaximumSpeed * distanceToTarget / stoppingDisance;
+
+            steeringForce.Normalize();
+            if (Vector2.Dot(Vehicle.Velocity, steeringForce) > rampedSpeed)
+            {
+                components.Thrust = -0.01f;
+            }
+
+            return components;
         }
     }
 }
