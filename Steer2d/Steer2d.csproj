@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\VehicleExtensions.cs" />
+    <Compile Include="IGetSteeringComponents.cs" />
     <Compile Include="IMovingObstacle.cs" />
     <Compile Include="IObstacle.cs" />
     <Compile Include="IPotentialCollisionDetector.cs" />

@@ -128,12 +128,12 @@ namespace FarseerPhysics.SamplesFramework
             _ship1 = new Ship(World);
             _ship1.Colour = Color.Cyan;
             _ship1.MaximumSpeed *= 0.5f;
-            _steering1 = new RotationPreferencedSteering(_ship1);
+            _steering1 = new Steering(_ship1, new RotationPreferencedSteering());
 
             _ship2 = new Ship(World);
             _ship2.Colour = Color.Magenta;
             _ship2.MaximumSpeed *= 0.5f;
-            _steering2 = new ThrustPreferencedSteering(_ship2);
+            _steering2 = new Steering(_ship2, new ThrustPreferencedSteering());
 
             ResetShips();
         }

@@ -19,15 +19,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Steer2d.Utility;
 
 namespace Steer2d
 {
     /// <summary>
-    /// A steering stategy that preferences thrust over rotation.
+    /// The interface for a class that can get steering components from a steering force.
     /// </summary>
-    public class ThrustPreferencedSteering : IGetSteeringComponents
-    {        
+    public interface IGetSteeringComponents
+    {
         /// <summary>
         /// Gets the steering components for the steering force and vehicle.
         /// </summary>
@@ -35,44 +34,7 @@ namespace Steer2d
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public SteeringComponents GetComponents(IVehicle vehicle, Vector2 steeringForce, float elapsedTime)
-        {
-            var rotation = VectorUtils.FindAngleBetweenTwoVectors(vehicle.Direction, steeringForce);
-
-            var maxRotation = vehicle.RotationRate * elapsedTime;
-
-            if (Math.Abs(rotation) > maxRotation)
-            {
-                rotation = MathHelper.Clamp(rotation, -maxRotation, maxRotation);
-            }
-
-            var normalizedSteeringForce = steeringForce;
-            normalizedSteeringForce.Normalize();
-            var thrust = Vector2.Dot(vehicle.Direction, normalizedSteeringForce);
-
-            // How parallel is the steering force compared to the vehicle direction
-            // 1 is parallel, 0 is perpendicular, -1 anti-parallel
-            float parallel = Vector2.Dot(vehicle.Direction, normalizedSteeringForce);
-
-            if (parallel > 0)
-            {
-                thrust *= vehicle.MaximumThrust;
-            }
-            else
-            {
-                thrust *= vehicle.MaximumReverseThrust;
-            }
-
-            thrust *= elapsedTime;
-            
-            return new SteeringComponents()
-            {
-                SteeringTarget = steeringForce,
-                SteeringForce = normalizedSteeringForce,
-                Rotation = rotation,
-                Thrust = thrust
-            };
-        }
+        SteeringComponents GetComponents(IVehicle vehicle, Vector2 steeringForce, float elapsedTime);
 
         /// <summary>
         /// Arrives at the target based on the given parameters.
@@ -83,20 +45,7 @@ namespace Steer2d
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public SteeringComponents ArriveAtImpl(IVehicle vehicle, float distanceToTarget, float stoppingDisance,
-            Vector2 steeringForce, float elapsedTime)
-        {
-            var components = GetComponents(vehicle, steeringForce, elapsedTime);
-
-            var rampedSpeed = vehicle.MaximumSpeed * distanceToTarget / stoppingDisance;
-
-            steeringForce.Normalize();
-            if (Vector2.Dot(vehicle.Velocity, steeringForce) > rampedSpeed)
-            {
-                components.Thrust = -0.01f;
-            }
-
-            return components;
-        }
+        SteeringComponents ArriveAtImpl(IVehicle vehicle, float distanceToTarget, float stoppingDisance,
+            Vector2 steeringForce, float elapsedTime);
     }
 }

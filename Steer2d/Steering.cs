@@ -24,9 +24,9 @@ using Steer2d.Utility;
 namespace Steer2d
 {
     /// <summary>
-    /// The base class for vehicle steering.
+    /// Provides vehicle steering.
     /// </summary>
-    public abstract class Steering
+    public class Steering
     {
         /// <summary>
         /// The vehicle steering is working on.
@@ -34,21 +34,39 @@ namespace Steer2d
         public IVehicle Vehicle { get; protected set; }
 
         /// <summary>
+        /// The utility for getting the steering components.
+        /// </summary>
+        public IGetSteeringComponents GetSteeringComponents { get; protected set; }
+
+        /// <summary>
+        /// The potential collision detector. Used for obstacle avoidance.
+        /// </summary>
+        public IPotentialCollisionDetector PotentialCollisionDetector { get; protected set; }
+
+        /// <summary>
         /// Creates a new steering instance.
         /// </summary>
         /// <param name="vehicle">The vehicle to use.</param>
-        public Steering(IVehicle vehicle)
+        /// <param name="getSteeringComponents">The utility for getting the steering components.</param>
+        public Steering(IVehicle vehicle, IGetSteeringComponents getSteeringComponents)
+            : this(vehicle, getSteeringComponents, null)
         {
-            Vehicle = vehicle;
         }
 
         /// <summary>
-        /// Gets the steering components for the steering force and vehicle.
+        /// Creates a new steering instance.
         /// </summary>
-        /// <param name="steeringForce">The steering force.</param>
-        /// <param name="elapsedTime">The elapsed time.</param>
-        /// <returns>The steering components.</returns>
-        public abstract SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime);
+        /// <param name="vehicle">The vehicle to use.</param>
+        /// <param name="getSteeringComponents">The utility for getting the steering components.</param>
+        /// <param name="potentialCollisionDetector">The potential collision detector.</param>
+        public Steering(IVehicle vehicle, IGetSteeringComponents getSteeringComponents, IPotentialCollisionDetector potentialCollisionDetector)
+        {
+            Vehicle = vehicle;
+            GetSteeringComponents = getSteeringComponents;
+            PotentialCollisionDetector = potentialCollisionDetector;
+
+            AvoidanceFactor = 1.1f;
+        }
 
         /// <summary>
         /// Seeks to a target point.
@@ -95,11 +113,6 @@ namespace Steer2d
         }
 
         /// <summary>
-        /// The potential collision detector. Used for obstacle avoidance.
-        /// </summary>
-        public IPotentialCollisionDetector PotentialCollisionDetector { get; set; }
-
-        /// <summary>
         /// Steers to avoid the given obstacles.
         /// </summary>
         /// <param name="obstacles">The obstacles to avoid.</param>
@@ -120,13 +133,19 @@ namespace Steer2d
 
                 // Offset to be past the obstacle's edge
                 perpendicular.Normalize();
-                var seekTo = nearestObstacle.Position + perpendicular * (nearestObstacle.Radius * 1.1f + Vehicle.Radius * 1.1f);
+                var seekTo = nearestObstacle.Position + perpendicular * (nearestObstacle.Radius + (Vehicle.Radius * AvoidanceFactor));
 
                 return GetComponents(seekTo, elapsedTime);
             }
 
             return SteeringComponents.NoSteering;
         }
+
+        /// <summary>
+        /// The avoidance factor. If set to 1.1f then the steering will attempt to place 10% of the ship radius
+        /// between the vehicle and the obstacle.
+        /// </summary>
+        public float AvoidanceFactor { get; set; }
 
         /// <summary>
         /// Arrives at a target point, stopping on arrival.
@@ -147,20 +166,20 @@ namespace Steer2d
             }
             else
             {
-                return ArriveAtImpl(distanceToTarget, stoppingDisance, 
+                return GetSteeringComponents.ArriveAtImpl(Vehicle, distanceToTarget, stoppingDisance, 
                     SteeringHelper.Seek(estimatedPosition, target), elapsedTime);
             }
         }
 
         /// <summary>
-        /// Arrives at the target based on the given parameters.
+        /// Gets the steering components for the steering force and vehicle.
         /// </summary>
-        /// <param name="distanceToTarget">The distance to the target.</param>
-        /// <param name="stoppingDisance">The minimum stopping distance.</param>
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        protected abstract SteeringComponents ArriveAtImpl(float distanceToTarget, float stoppingDisance, 
-            Vector2 steeringForce, float elapsedTime);
+        protected SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime)
+        {
+            return GetSteeringComponents.GetComponents(Vehicle, steeringForce, elapsedTime);
+        }
     }
 }
