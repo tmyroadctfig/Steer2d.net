@@ -94,6 +94,9 @@ namespace Steer2d.Example.Entities
             lineBatch.DrawLine(Body.Position, Body.Position + thrust, Color.Orange);
         }
 
+        public string LastSteeringObjective { get; set; }
+        public DateTime LastSteeringObjectiveUpdate { get; set; }
+
         public void ApplySteering(SteeringComponents steeringComponents1)
         {
             if (steeringComponents1.IsValid)
@@ -109,6 +112,12 @@ namespace Steer2d.Example.Entities
                 Thrust = thrust;
 
                 Body.LinearVelocity += thrust;
+
+                if (LastSteeringObjectiveUpdate == null || (DateTime.Now - LastSteeringObjectiveUpdate).TotalMilliseconds > 250)
+                {
+                    LastSteeringObjective = steeringComponents1.SteeringObjective;
+                    LastSteeringObjectiveUpdate = DateTime.Now;
+                }
             }
 
             LimitVelocity();

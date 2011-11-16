@@ -42,10 +42,11 @@ namespace Steer2d
         /// Gets the steering components for the steering force and vehicle.
         /// </summary>
         /// <param name="vehicle">The vehicle the steering force is operating on.</param>
+        /// <param name="steeringObjective">A string describing the steering force.</param>
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public SteeringComponents GetComponents(IVehicle vehicle, Vector2 steeringForce, float elapsedTime)
+        public SteeringComponents GetComponents(IVehicle vehicle, string steeringObjective, Vector2 steeringForce, float elapsedTime)
         {
             var rotation = VectorUtils.FindAngleBetweenTwoVectors(vehicle.Direction, steeringForce);
 
@@ -84,6 +85,7 @@ namespace Steer2d
 
             return new SteeringComponents()
             {
+                SteeringObjective = steeringObjective,
                 SteeringTarget = steeringForce,
                 SteeringForce = normalizedSteeringForce,
                 Rotation = clampedRotation,
@@ -94,7 +96,7 @@ namespace Steer2d
         public SteeringComponents ArriveAtImpl(IVehicle vehicle, float distanceToTarget, float stoppingDisance, 
             Vector2 steeringForce, float elapsedTime)
         {
-            var components = GetComponents(vehicle, steeringForce, elapsedTime);
+            var components = GetComponents(vehicle, "Arrive at", steeringForce, elapsedTime);
 
             var rampedSpeed = vehicle.MaximumSpeed * distanceToTarget / stoppingDisance;
 

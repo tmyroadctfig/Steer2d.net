@@ -60,6 +60,7 @@ namespace FarseerPhysics.SamplesFramework
             var demo3 = new Demo3();
             var demo4 = new Demo4();
             var demo5 = new Demo5();
+            var demo6 = new Demo6();
 
             MenuScreen menuScreen = new MenuScreen("Farseer Samples");
 
@@ -69,6 +70,7 @@ namespace FarseerPhysics.SamplesFramework
             menuScreen.AddMenuItem(demo3.GetTitle(), EntryType.Screen, demo3);
             menuScreen.AddMenuItem(demo4.GetTitle(), EntryType.Screen, demo4);
             menuScreen.AddMenuItem(demo5.GetTitle(), EntryType.Screen, demo5);
+            menuScreen.AddMenuItem(demo6.GetTitle(), EntryType.Screen, demo6);
 
             menuScreen.AddMenuItem("", EntryType.Separator, null);
             menuScreen.AddMenuItem("Exit", EntryType.ExitItem, null);

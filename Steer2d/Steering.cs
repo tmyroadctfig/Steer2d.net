@@ -66,6 +66,10 @@ namespace Steer2d
             PotentialCollisionDetector = potentialCollisionDetector;
 
             AvoidanceFactor = 1.1f;
+
+            MaximumBoidDistance = 1000;
+            MinimumBoidDistance = 50f;
+            BoidCohesionDistance = 60f;
         }
 
         /// <summary>
@@ -79,7 +83,7 @@ namespace Steer2d
             var estimatedPosition = Vehicle.Position + Vehicle.Velocity * elapsedTime;
             var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
 
-            return GetComponents(steeringForce, elapsedTime);
+            return GetComponents("Seek", steeringForce, elapsedTime);
         }
 
         /// <summary>
@@ -94,7 +98,7 @@ namespace Steer2d
             var estimatedTagetPosition = target.Position + target.Velocity * elapsedTime;
             var steeringForce = SteeringHelper.Seek(estimatedPosition, estimatedTagetPosition);
 
-            return GetComponents(steeringForce, elapsedTime);
+            return GetComponents("Pursue", steeringForce, elapsedTime);
         }
 
         /// <summary>
@@ -109,7 +113,7 @@ namespace Steer2d
             var estimatedTagetPosition = target.Position + target.Velocity * elapsedTime;
             var steeringForce = SteeringHelper.Flee(estimatedPosition, estimatedTagetPosition);
 
-            return GetComponents(steeringForce, elapsedTime);
+            return GetComponents("Evade", steeringForce, elapsedTime);
         }
 
         /// <summary>
@@ -135,7 +139,7 @@ namespace Steer2d
                 perpendicular.Normalize();
                 var seekTo = nearestObstacle.Position + perpendicular * (nearestObstacle.Radius + (Vehicle.Radius * AvoidanceFactor));
 
-                return GetComponents(seekTo, elapsedTime);
+                return GetComponents("Avoid obstacle", seekTo, elapsedTime);
             }
 
             return SteeringComponents.NoSteering;
@@ -146,6 +150,97 @@ namespace Steer2d
         /// between the vehicle and the obstacle.
         /// </summary>
         public float AvoidanceFactor { get; set; }
+
+        /// <summary>
+        /// Steers to stay aligned and cohesive to the flock.
+        /// </summary>
+        /// <param name="flock">The flock of vehicles to stay with.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering force.</returns>
+        public SteeringComponents Flock(IEnumerable<IVehicle> flock, float elapsedTime)
+        {
+            // Filter out any boids that are too distance
+            var maxBoidDistanceSquared = MaximumBoidDistance * MaximumBoidDistance;
+
+            var closeBoids = flock
+                .Where(b => !Vehicle.Equals(b))
+                .Select(b => new
+                {
+                    Boid = b,
+                    DistanceSquared = (b.Position - Vehicle.Position).LengthSquared()
+                });
+
+            closeBoids = closeBoids
+                .OrderBy(bd => bd.DistanceSquared);
+
+            closeBoids = closeBoids
+                .Where(bd => bd.DistanceSquared < MaximumBoidDistance);
+
+            closeBoids = closeBoids
+                .Take(5);
+
+            if (!closeBoids.Any())
+            {
+                // Found no other boids!
+                return SteeringComponents.NoSteering;
+            }
+
+            if (closeBoids.First().DistanceSquared < MinimumBoidDistance)
+            {
+                // Steer to separate
+                Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Position);
+
+                //        // add in steering contribution
+                //        // (opposite of the offset direction, divided once by distance
+                //        // to normalize, divided another time to get 1/d falloff)
+                //        Vector3 offset = (other).Position - Position;
+                //        float distanceSquared = Vector3.Dot(offset, offset);
+                //        steering += (offset / -distanceSquared);
+
+
+                direction /= closeBoids.Count();
+                direction.Normalize();
+
+                return GetComponents("Flocking: separation", direction, elapsedTime);
+            }
+            else if (closeBoids.First().DistanceSquared > BoidCohesionDistance)
+            {
+                // Steer for cohension
+                Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Position);
+                                
+                direction /= closeBoids.Count();
+                direction -= Vehicle.Position;
+                direction.Normalize();
+
+                return GetComponents("Flocking: cohesion", direction, elapsedTime);
+            }
+            else
+            {
+                // Steer for alignment
+                Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Direction);
+
+                direction /= closeBoids.Count();
+                direction -= Vehicle.Direction;
+                direction.Normalize();
+
+                return GetComponents("Flocking: alignment", direction, elapsedTime);
+            }
+        }
+
+        /// <summary>
+        /// The maximum distance between this vehicle and another before the other is not considered in flocking calculations.
+        /// </summary>
+        public float MaximumBoidDistance { get; set; }
+
+        /// <summary>
+        /// The minimum distance between this vehicle and another before this vehicle will steer away slightly.
+        /// </summary>
+        public float MinimumBoidDistance { get; set; }
+
+        /// <summary>
+        /// The distance between this vehicle and another before this vehicle will steer towards the other slightly.
+        /// </summary>
+        public float BoidCohesionDistance { get; set; }
 
         /// <summary>
         /// Arrives at a target point, stopping on arrival.
@@ -162,7 +257,7 @@ namespace Steer2d
             if (distanceToTarget > stoppingDisance)
             {
                 var steeringForce = SteeringHelper.Seek(estimatedPosition, target);
-                return GetComponents(steeringForce, elapsedTime);
+                return GetComponents("Arrive at: seek", steeringForce, elapsedTime);
             }
             else
             {
@@ -174,12 +269,13 @@ namespace Steer2d
         /// <summary>
         /// Gets the steering components for the steering force and vehicle.
         /// </summary>
+        /// <param name="steeringObjective">A string describing the steering force.</param>
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        protected SteeringComponents GetComponents(Vector2 steeringForce, float elapsedTime)
+        protected SteeringComponents GetComponents(string steeringObjective, Vector2 steeringForce, float elapsedTime)
         {
-            return GetSteeringComponents.GetComponents(Vehicle, steeringForce, elapsedTime);
+            return GetSteeringComponents.GetComponents(Vehicle, steeringObjective, steeringForce, elapsedTime);
         }
     }
 }

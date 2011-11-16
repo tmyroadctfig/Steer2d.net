@@ -31,10 +31,11 @@ namespace Steer2d
         /// Gets the steering components for the steering force and vehicle.
         /// </summary>
         /// <param name="vehicle">The vehicle the steering force is operating on.</param>
+        /// <param name="steeringObjective">A string describing the steering force.</param>
         /// <param name="steeringForce">The steering force.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        SteeringComponents GetComponents(IVehicle vehicle, Vector2 steeringForce, float elapsedTime);
+        SteeringComponents GetComponents(IVehicle vehicle, string steeringObjective, Vector2 steeringForce, float elapsedTime);
 
         /// <summary>
         /// Arrives at the target based on the given parameters.

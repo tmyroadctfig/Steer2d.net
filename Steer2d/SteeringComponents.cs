@@ -28,6 +28,11 @@ namespace Steer2d
     public struct SteeringComponents
     {
         /// <summary>
+        /// A tag describing the objective of the steering force. E.g. "Flock: cohesion", "No steering", etc.
+        /// </summary>
+        public string SteeringObjective { get; set; }
+
+        /// <summary>
         /// The target position that relates to the steering force. E.g. the destination point the steering is aiming for.
         /// </summary>
         public Vector2 SteeringTarget { get; set; }
@@ -63,6 +68,11 @@ namespace Steer2d
         /// <summary>
         /// A instance to represent no steering force.
         /// </summary>
-        public static readonly SteeringComponents NoSteering = new SteeringComponents();
+        public static readonly SteeringComponents NoSteering = new SteeringComponents()
+            {
+                SteeringObjective = "No steering",
+                Thrust = float.NaN,
+                Rotation = float.NaN
+            };
     }
 }
