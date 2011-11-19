@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace Steer2d
 {
@@ -33,6 +34,56 @@ namespace Steer2d
             // From: v^2 = u^2 + 2as, and since v = 0:            
             // s = u^2 / 2a
             return vehicle.Velocity.LengthSquared() / 2 * vehicle.MaximumReverseThrust;
+        }
+
+        /// <summary>
+        /// Checks if the target position if ahead of the vehicle.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to check.</param>
+        /// <param name="target">The target to check.</param>
+        /// <returns>true if in front.</returns>
+        public static bool IsAhead(this IVehicle vehicle, Vector2 target)
+        {
+            return IsAhead(vehicle, target, 0.707f);
+        }
+
+        /// <summary>
+        /// Checks if the target position if ahead of the vehicle.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to check.</param>
+        /// <param name="target">The target to check.</param>
+        /// <param name="cosineThreshold">The threshold to check within.</param>
+        /// <returns>true if in front.</returns>
+        public static bool IsAhead(this IVehicle vehicle, Vector2 target, float cosineThreshold)
+        {
+            var targetDirection = (target - vehicle.Position);
+            targetDirection.Normalize();
+            return Vector2.Dot(vehicle.Direction, targetDirection) > cosineThreshold;
+        }
+
+        /// <summary>
+        /// Checks if the target position if behind of the vehicle.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to check.</param>
+        /// <param name="target">The target to check.</param>
+        /// <returns>true if behind.</returns>
+        public static bool IsBehind(this IVehicle vehicle, Vector2 target)
+        {
+            return IsBehind(vehicle, target, -0.707f);
+        }
+
+        /// <summary>
+        /// Checks if the target position if behind of the vehicle.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to check.</param>
+        /// <param name="target">The target to check.</param>
+        /// <param name="cosineThreshold">The threshold to check within.</param>
+        /// <returns>true if behind.</returns>
+        public static bool IsBehind(this IVehicle vehicle, Vector2 target, float cosineThreshold)
+        {
+            var targetDirection = (target - vehicle.Position);
+            targetDirection.Normalize();
+            return Vector2.Dot(vehicle.Direction, targetDirection) < cosineThreshold;
         }
     }
 }
