@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoidDistance.cs" />
     <Compile Include="Extensions\VehicleExtensions.cs" />
     <Compile Include="IGetSteeringComponents.cs" />
     <Compile Include="IMovingObstacle.cs" />

@@ -159,25 +159,7 @@ namespace Steer2d
         /// <returns>The steering force.</returns>
         public SteeringComponents Flock(IEnumerable<IVehicle> flock, float elapsedTime)
         {
-            // Filter out any boids that are too distance
-            var maxBoidDistanceSquared = MaximumBoidDistance * MaximumBoidDistance;
-
-            var closeBoids = flock
-                .Where(b => !Vehicle.Equals(b))
-                .Select(b => new
-                {
-                    Boid = b,
-                    DistanceSquared = (b.Position - Vehicle.Position).LengthSquared()
-                });
-
-            closeBoids = closeBoids
-                .OrderBy(bd => bd.DistanceSquared);
-
-            closeBoids = closeBoids
-                .Where(bd => bd.DistanceSquared < MaximumBoidDistance);
-
-            closeBoids = closeBoids
-                .Take(5);
+            var closeBoids = FindCloseBoids(flock);
 
             if (!closeBoids.Any())
             {
@@ -188,43 +170,116 @@ namespace Steer2d
             if (closeBoids.First().DistanceSquared < MinimumBoidDistance)
             {
                 // Steer to separate
-                Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Position);
-
-                //        // add in steering contribution
-                //        // (opposite of the offset direction, divided once by distance
-                //        // to normalize, divided another time to get 1/d falloff)
-                //        Vector3 offset = (other).Position - Position;
-                //        float distanceSquared = Vector3.Dot(offset, offset);
-                //        steering += (offset / -distanceSquared);
-
-
-                direction /= closeBoids.Count();
-                direction.Normalize();
-
-                return GetComponents("Flocking: separation", direction, elapsedTime);
+                return SeparationImpl(closeBoids, elapsedTime);
             }
             else if (closeBoids.First().DistanceSquared > BoidCohesionDistance)
             {
                 // Steer for cohension
-                Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Position);
-                                
-                direction /= closeBoids.Count();
-                direction -= Vehicle.Position;
-                direction.Normalize();
-
-                return GetComponents("Flocking: cohesion", direction, elapsedTime);
+                return CohesionImpl(closeBoids, elapsedTime);
             }
             else
             {
                 // Steer for alignment
-                Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Direction);
-
-                direction /= closeBoids.Count();
-                direction -= Vehicle.Direction;
-                direction.Normalize();
-
-                return GetComponents("Flocking: alignment", direction, elapsedTime);
+                return AlignmentImpl(closeBoids, elapsedTime);
             }
+        }
+
+        /// <summary>
+        /// Steers to separate from neighbours.
+        /// </summary>
+        /// <param name="neighbours">The vehicles to separate from.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering force.</returns>
+        public SteeringComponents Separate(IEnumerable<IVehicle> neighbours, float elapsedTime)
+        {
+            var closeBoids = FindCloseBoids(neighbours);
+            
+            if (closeBoids.Any() && closeBoids.First().DistanceSquared < MinimumBoidDistance)
+            {
+                // Steer to separate
+                return SeparationImpl(closeBoids, elapsedTime);
+            }
+
+            return SteeringComponents.NoSteering;
+        }
+
+        /// <summary>
+        /// Separates from nearby neighbours.
+        /// </summary>
+        /// <param name="closeBoids">The close boids.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering force.</returns>
+        protected SteeringComponents SeparationImpl(IEnumerable<BoidDistance> closeBoids, float elapsedTime)
+        {
+            Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Position);
+            direction /= closeBoids.Count();
+            direction.Normalize();
+
+            return GetComponents("Flocking: separation", direction, elapsedTime);
+        }
+
+        /// <summary>
+        /// Steers for cohesion.
+        /// </summary>
+        /// <param name="closeBoids">The close boids.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering force.</returns>
+        protected SteeringComponents CohesionImpl(IEnumerable<BoidDistance> closeBoids, float elapsedTime)
+        {
+            Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Position);
+
+            direction /= closeBoids.Count();
+            direction -= Vehicle.Position;
+            direction.Normalize();
+
+            return GetComponents("Flocking: cohesion", direction, elapsedTime);
+        }
+
+        /// <summary>
+        /// Steers for alignment.
+        /// </summary>
+        /// <param name="closeBoids">The close boids.</param>
+        /// <param name="elapsedTime">The elapsed time.</param>
+        /// <returns>The steering force.</returns>
+        protected SteeringComponents AlignmentImpl(IEnumerable<BoidDistance> closeBoids, float elapsedTime)
+        {
+            Vector2 direction = closeBoids.Aggregate(Vector2.Zero, (p, b) => p + b.Boid.Direction);
+
+            direction /= closeBoids.Count();
+            direction -= Vehicle.Direction;
+            direction.Normalize();
+
+            return GetComponents("Flocking: alignment", direction, elapsedTime);
+        }
+
+        /// <summary>
+        /// Finds close boids for flocking. Any boids further than "MaximumBoidDistance" will be filtered.
+        /// </summary>
+        /// <param name="flock">The flock to find close boids in.</param>
+        /// <returns>The close boids ordered by closest boid first.</returns>
+        public IEnumerable<BoidDistance> FindCloseBoids(IEnumerable<IVehicle> flock)
+        {
+            // Filter out any boids that are too distance
+            var maxBoidDistanceSquared = MaximumBoidDistance * MaximumBoidDistance;
+
+            var closeBoids = flock
+                .Where(b => !Vehicle.Equals(b))
+                .Select(b => new BoidDistance
+                    {
+                        Boid = b, 
+                        DistanceSquared = (b.Position - Vehicle.Position).LengthSquared()
+                    });
+
+            closeBoids = closeBoids
+                .OrderBy(bd => bd.DistanceSquared);
+
+            closeBoids = closeBoids
+                .Where(bd => bd.DistanceSquared < MaximumBoidDistance);
+
+            closeBoids = closeBoids
+                .Take(5);
+
+            return closeBoids;
         }
 
         /// <summary>
