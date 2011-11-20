@@ -222,7 +222,7 @@ namespace FarseerPhysics.SamplesFramework
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var steeringComponents = _steering.SteerToAvoidObstacles(obstacles, 1.0f, elapsedTime);
+            var steeringComponents = _steering.AvoidObstacles(obstacles, 1.0f, elapsedTime);
 
             if (steeringComponents.Equals(SteeringComponents.NoSteering))
             {

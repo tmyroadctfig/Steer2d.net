@@ -123,7 +123,7 @@ namespace Steer2d
         /// <param name="detectionPeriod">The time window to perform detection in. E.g. 1 second from current position.</param>
         /// <param name="elapsedTime">The elapsed time.</param>
         /// <returns>The steering components.</returns>
-        public SteeringComponents SteerToAvoidObstacles(IEnumerable<IObstacle> obstacles, float detectionPeriod, float elapsedTime)
+        public SteeringComponents AvoidObstacles(IEnumerable<IObstacle> obstacles, float detectionPeriod, float elapsedTime)
         {
             IObstacle nearestObstacle = PotentialCollisionDetector
                 .FindNearestPotentialCollision(Vehicle, obstacles, detectionPeriod);
