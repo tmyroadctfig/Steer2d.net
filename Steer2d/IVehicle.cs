@@ -50,6 +50,6 @@ namespace Steer2d
         /// <summary>
         /// The maximum speed the vehicle can move at.
         /// </summary>
-        float MaximumSpeed { get; }
+        float? MaximumSpeed { get; }
     }
 }

@@ -54,7 +54,7 @@ namespace Steer2d.Example.Entities
 
         public Color Colour { get; set; }
 
-        public float MaximumSpeed { get; set; }
+        public float? MaximumSpeed { get; set; }
 
         public float MaximumThrust { get; set; }
 
@@ -68,7 +68,7 @@ namespace Steer2d.Example.Entities
             {
                 var limitedVelocity = Body.LinearVelocity;
                 limitedVelocity.Normalize();
-                limitedVelocity *= MaximumSpeed;
+                limitedVelocity *= MaximumSpeed.Value;
 
                 Body.LinearVelocity = limitedVelocity;
             }
