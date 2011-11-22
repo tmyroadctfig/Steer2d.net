@@ -67,9 +67,9 @@ namespace Steer2d
 
             AvoidanceFactor = 1.1f;
 
-            MaximumBoidDistance = 1000;
-            MinimumBoidDistance = 50f;
-            BoidCohesionDistance = 60f;
+            MaximumBoidDistance = 400;
+            MinimumBoidDistance = 50;
+            BoidCohesionDistance = 100;
         }
 
         /// <summary>
